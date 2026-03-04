@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TVBH</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-param" content="<%= request_forgery_protection_token %>">
+    <meta name="csrf-token" content="<%= form_authenticity_token %>">
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag 'application', defer: true %>
+  </head>
+  <body>
+    <% if notice.present? %>
+      <p style="color: green"><%= notice %></p>
+    <% end %>
+    <% if alert.present? %>
+      <p style="color: red"><%= alert %></p>
+    <% end %>
+    <%= yield %>
+  </body>
+</html>
