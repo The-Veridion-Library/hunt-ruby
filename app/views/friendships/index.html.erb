@@ -1,0 +1,18 @@
+<h1>👥 My Friends</h1>
+
+<%= link_to "Pending Requests", friendship_requests_path %>
+
+<% if @friends.any? %>
+  <% @friends.each do |friendship| %>
+    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+      <span>
+        <%= link_to friendship.friend.username, profile_path(friendship.friend.username) %>
+        — <%= friendship.friend.points.to_i %> pts
+      </span>
+      <%= button_to "Remove", friendship_path(friendship), method: :delete,
+          style: "background:transparent; border:1px solid #ccc; cursor:pointer; padding:4px 8px;" %>
+    </div>
+  <% end %>
+<% else %>
+  <p>No friends yet — visit someone's profile to add them!</p>
+<% end %>

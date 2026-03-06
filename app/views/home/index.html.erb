@@ -1,1 +1,18 @@
 <div id="svelte-app"></div>
+
+<% if user_signed_in? %>
+  <hr>
+  <h2>📰 Friends Activity Feed</h2>
+  <% if @feed&.any? %>
+    <% @feed.each do |find| %>
+      <div style="border:1px solid #eee; padding:10px; margin-bottom:8px;">
+        <strong><%= link_to find.user.username, profile_path(find.user.username) %></strong>
+        found <strong><%= find.book.title %></strong> by <%= find.book.author %>
+        <br>
+        <small><%= find.found_at.strftime("%B %d, %Y at %I:%M %p") %> · +<%= find.points_awarded %> pts</small>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="color:#aaa;">No activity yet — add some friends to see their finds here!</p>
+  <% end %>
+<% end %>

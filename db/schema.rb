@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_04_013726) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_05_024538) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,7 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_04_013726) do
     t.datetime "created_at", null: false
     t.bigint "location_id", null: false
     t.string "qr_code"
-    t.string "status"
+    t.string "status", default: "created"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["book_id"], name: "index_labels_on_book_id"
@@ -73,11 +73,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_04_013726) do
   end
 
   create_table "locations", force: :cascade do |t|
-    t.string "address"
+    t.string "address_line_1"
+    t.string "address_line_2"
+    t.string "city"
     t.datetime "created_at", null: false
+    t.decimal "latitude"
     t.string "location_type"
+    t.decimal "longitude"
     t.string "name"
+    t.string "state"
     t.datetime "updated_at", null: false
+    t.string "zip_code"
   end
 
   create_table "user_badges", force: :cascade do |t|

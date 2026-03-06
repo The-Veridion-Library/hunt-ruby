@@ -1,0 +1,73 @@
+<div>
+  <h1>👤 <%= @profile_user.username %></h1>
+  <% unless @profile_user == current_user %>
+    <% existing = Friendship.find_by(user: current_user, friend: @profile_user) %>
+    <% if existing.nil? %>
+      <%= button_to "➕ Add Friend", friendships_path(friend_id: @profile_user.id),
+          method: :post,
+          style: "background:#3b82f6; color:white; border:none; cursor:pointer; padding:6px 14px; border-radius:4px;" %>
+    <% elsif existing.status == 'pending' %>
+      <span style="color:#aaa;">⏳ Friend request pending</span>
+    <% else %>
+      <span style="color:#22c55e;">✅ Friends</span>
+    <% end %>
+  <% end %>
+
+  <% if @profile_user.bio.present? %>
+    <p><em><%= @profile_user.bio %></em></p>
+  <% end %>
+
+  <p><strong>⭐ Points:</strong> <%= @points %></p>
+  <p><strong>📚 Books Hidden:</strong> <%= @hidden_books.count %></p>
+  <p><strong>🎯 Books Found:</strong> <%= @finds.count %></p>
+</div>
+
+<hr>
+
+<h2>🏅 Badges</h2>
+<% if @badges.any? %>
+  <div style="display:flex; gap:16px; flex-wrap:wrap;">
+    <% @badges.each do |badge| %>
+      <div style="border:1px solid #ccc; padding:12px; border-radius:8px; text-align:center; width:120px;">
+        <div style="font-size:2rem;"><%= badge.icon %></div>
+        <strong><%= badge.name %></strong>
+        <p style="font-size:0.8rem; color:#666;"><%= badge.description %></p>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>No badges yet — get out there and find some books!</p>
+<% end %>
+
+<hr>
+
+<h2>🎯 Recent Finds</h2>
+<% if @finds.any? %>
+  <% @finds.each do |find| %>
+    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px;">
+      <strong><%= find.book.title %></strong> by <%= find.book.author %>
+      <br>
+      <small>Found on <%= find.found_at.strftime("%B %d, %Y") %> · +<%= find.points_awarded %> pts</small>
+      <% if find.photo.present? %>
+        <br><img src="<%= find.photo %>" style="max-width:150px; margin-top:6px;">
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <p>No finds yet.</p>
+<% end %>
+
+<hr>
+
+<h2>📚 Books Hidden</h2>
+<% if @hidden_books.any? %>
+  <% @hidden_books.each do |book| %>
+    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px;">
+      <strong><%= link_to book.title, book_path(book) %></strong> by <%= book.author %>
+      <br>
+      <small>Status: <%= book.status.capitalize %></small>
+    </div>
+  <% end %>
+<% else %>
+  <p>No books hidden yet.</p>
+<% end %>

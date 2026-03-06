@@ -1,17 +1,23 @@
 Rails.application.routes.draw do
-
-  root "home#index"
   devise_for :users
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  root "home#index"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  resources :books,       only: [:index, :new, :create, :show]
+  resources :locations,   only: [:index, :new, :create]
+  resources :labels,      only: [:index, :new, :create, :show, :edit, :update]
+  resources :finds,       only: [:index, :new, :create]
+  resources :profiles,    only: [:show], param: :username
+  resources :friendships, only: [:create, :destroy, :index]
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  get  '/friendships/requests',    to: 'friendships#requests',   as: :friendship_requests
+  patch '/friendships/:id/accept', to: 'friendships#accept',     as: :accept_friendship
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  get '/finds/scan/:qr_token', to: 'finds#scan', as: :scan_find
+
+  namespace :api do
+    resources :labels, only: [:index]
+  end
+
+  get '/map',         to: 'map#index',         as: :map
+  get '/leaderboard', to: 'leaderboard#index', as: :leaderboard
 end

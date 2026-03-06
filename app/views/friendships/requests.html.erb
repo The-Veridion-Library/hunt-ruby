@@ -1,0 +1,16 @@
+<h1>📬 Friend Requests</h1>
+
+<% if @pending.any? %>
+  <% @pending.each do |friendship| %>
+    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+      <span>
+        <%= link_to friendship.user.username, profile_path(friendship.user.username) %>
+        wants to be your friend
+      </span>
+      <%= button_to "Accept", accept_friendship_path(friendship), method: :patch,
+          style: "background:#22c55e; color:white; border:none; cursor:pointer; padding:6px 12px;" %>
+    </div>
+  <% end %>
+<% else %>
+  <p>No pending requests.</p>
+<% end %>

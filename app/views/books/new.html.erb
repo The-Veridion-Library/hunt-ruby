@@ -1,0 +1,42 @@
+<h1>Hide a Book</h1>
+
+<%= form_with model: @book do |f| %>
+  <% if @book.errors.any? %>
+    <div style="color:red">
+      <% @book.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title %>
+    <%= f.text_field :title, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :author %>
+    <%= f.text_field :author, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :isbn, "ISBN" %>
+    <%= f.text_field :isbn %>
+  </div>
+
+  <div>
+    <%= f.label :cover_image, "Cover Image URL" %>
+    <%= f.text_field :cover_image %>
+  </div>
+
+  <div>
+    <label for="location_id">Location</label>
+    <%= select_tag :location_id,
+        options_from_collection_for_select(@locations, :id, :name),
+        prompt: "Select a location", required: true %>
+  </div>
+
+  <%= f.submit "Hide this Book!" %>
+<% end %>
+
+<p><%= link_to "Add a new location first", new_location_path %></p>

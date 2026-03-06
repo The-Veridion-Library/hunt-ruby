@@ -1,0 +1,35 @@
+<h1>🏆 Leaderboard</h1>
+
+<% if @current_rank %>
+  <p>Your current rank: <strong>#<%= @current_rank %></strong> with <strong><%= current_user.points.to_i %> points</strong></p>
+<% end %>
+
+<% if @users.any? %>
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="background:#222; color:white;">
+        <th style="padding:10px; text-align:left;">Rank</th>
+        <th style="padding:10px; text-align:left;">Username</th>
+        <th style="padding:10px; text-align:left;">Points</th>
+        <th style="padding:10px; text-align:left;">Badges</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each_with_index do |user, index| %>
+        <tr style="<%= 'background:#fffbcc;' if user.id == current_user.id %> border-bottom:1px solid #eee;">
+          <td style="padding:10px;">
+            <%= index == 0 ? '🥇' : index == 1 ? '🥈' : index == 2 ? '🥉' : "##{index + 1}" %>
+          </td>
+          <td style="padding:10px;">
+            <%= link_to user.username, profile_path(user.username) %>
+            <%= ' 👈 you' if user.id == current_user.id %>
+          </td>
+          <td style="padding:10px;"><%= user.points %> pts</td>
+          <td style="padding:10px;"><%= user.badges.count %> 🏅</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No hunters on the board yet — go find some books! <%= link_to "View Map", map_path %></p>
+<% end %>

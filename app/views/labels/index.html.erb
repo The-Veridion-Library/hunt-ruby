@@ -1,0 +1,30 @@
+<h1>My Labels</h1>
+
+<%= link_to "Create New Label", new_label_path %>
+
+<% if @labels.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Book</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @labels.each do |label| %>
+        <tr>
+          <td><%= label.book.title %></td>
+          <td><%= label.location.name %></td>
+          <td><%= label.status.capitalize %></td>
+          <td><%= label.created_at.strftime("%b %d, %Y") %></td>
+          <td><%= link_to "View", label_path(label) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No labels yet. <%= link_to "Create one!", new_label_path %></p>
+<% end %>

@@ -1,0 +1,22 @@
+<h1>You Found a Book! 🎉</h1>
+
+<% if @book.cover_image.present? %>
+  <img src="<%= @book.cover_image %>" alt="<%= @book.title %>" style="max-width: 200px;">
+<% end %>
+
+<h2><%= @book.title %></h2>
+<p><strong>Author:</strong> <%= @book.author %></p>
+<p><strong>ISBN:</strong> <%= @book.isbn %></p>
+<p><strong>Hidden by:</strong> <%= @book.user.username %></p>
+<p><strong>Location:</strong> <%= @label.location.name %></p>
+
+<%= form_with url: finds_path, method: :post do |f| %>
+  <%= hidden_field_tag :qr_token, @label.qr_code %>
+
+  <div>
+    <%= f.label :photo, "Upload a photo as proof (optional)" %>
+    <%= f.text_field :photo, placeholder: "Paste an image URL" %>
+  </div>
+
+  <%= f.submit "Confirm Find — Claim +10 Points!" %>
+<% end %>

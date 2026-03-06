@@ -1,0 +1,10 @@
+<h1>Label #<%= @label.id %></h1>
+<p><strong>Book:</strong> <%= @label.book.title %></p>
+<p><strong>Location:</strong> <%= @label.location.name %></p>
+<p><strong>Status:</strong> <%= @label.status.capitalize %></p>
+<p><strong>QR Code:</strong> <%= @label.qr_code %></p>
+
+<h2>QR Code</h2>
+<%= raw @qr_svg %>
+
+<%= link_to "Update Status", edit_label_path(@label) %>

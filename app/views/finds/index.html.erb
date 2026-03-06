@@ -1,0 +1,17 @@
+<h1>My Finds</h1>
+
+<% if @finds.any? %>
+  <% @finds.each do |find| %>
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+      <h3><%= find.book.title %></h3>
+      <p><strong>Author:</strong> <%= find.book.author %></p>
+      <p><strong>Found at:</strong> <%= find.found_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      <p><strong>Points earned:</strong> +<%= find.points_awarded %></p>
+      <% if find.photo.present? %>
+        <img src="<%= find.photo %>" alt="Find photo" style="max-width: 200px;">
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <p>You haven't found any books yet. <%= link_to "Check the map!", map_path %></p>
+<% end %>

@@ -1,0 +1,13 @@
+<h1><%= @book.title %></h1>
+<p><strong>Author:</strong> <%= @book.author %></p>
+<p><strong>ISBN:</strong> <%= @book.isbn %></p>
+<p><strong>Status:</strong> <%= @book.status %></p>
+<p><strong>Hidden by:</strong> <%= @book.user.username %></p>
+
+<% if @label && @book.user == current_user %>
+  <h2>Your QR Code</h2>
+  <p>Print this and stick it inside the book cover!</p>
+  <%= raw @qr_svg %>
+<% end %>
+
+<%= link_to "Hide another book", new_book_path %>

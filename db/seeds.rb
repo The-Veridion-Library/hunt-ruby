@@ -1,9 +1,27 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+Badge.find_or_create_by!(name: 'First Find') do |b|
+  b.description = 'Found your first book!'
+  b.icon        = '📖'
+  b.threshold   = 1
+  b.badge_type  = 'finds'
+end
+
+Badge.find_or_create_by!(name: 'Book Worm') do |b|
+  b.description = 'Found 10 books!'
+  b.icon        = '🐛'
+  b.threshold   = 10
+  b.badge_type  = 'finds'
+end
+
+Badge.find_or_create_by!(name: 'Librarian') do |b|
+  b.description = 'Hidden 5 books for others to find!'
+  b.icon        = '📚'
+  b.threshold   = 5
+  b.badge_type  = 'hidden'
+end
+
+Badge.find_or_create_by!(name: 'Centurion') do |b|
+  b.description = 'Earned 100 points!'
+  b.icon        = '🏆'
+  b.threshold   = 100
+  b.badge_type  = 'points'
+end
