@@ -1,30 +1,44 @@
-<h1>My Labels</h1>
-
-<%= link_to "Create New Label", new_label_path %>
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="page-title">🏷 My Labels</h1>
+    <p class="page-subtitle">QR code labels for your hidden books</p>
+  </div>
+  <%= link_to "Create New Label", new_label_path, class: "btn-primary" %>
+</div>
 
 <% if @labels.any? %>
-  <table>
-    <thead>
-      <tr>
-        <th>Book</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Created</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @labels.each do |label| %>
+  <div class="card p-0 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-100">
         <tr>
-          <td><%= label.book.title %></td>
-          <td><%= label.location.name %></td>
-          <td><%= label.status.capitalize %></td>
-          <td><%= label.created_at.strftime("%b %d, %Y") %></td>
-          <td><%= link_to "View", label_path(label) %></td>
+          <th class="text-left px-6 py-3 text-slate-500 font-medium">Book</th>
+          <th class="text-left px-6 py-3 text-slate-500 font-medium">Location</th>
+          <th class="text-left px-6 py-3 text-slate-500 font-medium">Status</th>
+          <th class="text-left px-6 py-3 text-slate-500 font-medium">Created</th>
+          <th class="px-6 py-3"></th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% @labels.each do |label| %>
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-4 font-medium text-slate-800"><%= label.book.title %></td>
+            <td class="px-6 py-4 text-slate-600"><%= label.location.name %></td>
+            <td class="px-6 py-4">
+              <span class="badge-pill <%= label.status == 'placed' ? 'bg-emerald-100 text-emerald-700' : label.status == 'printed' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600' %>">
+                <%= label.status.capitalize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-slate-500"><%= label.created_at.strftime("%b %d, %Y") %></td>
+            <td class="px-6 py-4 text-right"><%= link_to "View →", label_path(label), class: "text-indigo-600 hover:text-indigo-800 font-medium" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 <% else %>
-  <p>No labels yet. <%= link_to "Create one!", new_label_path %></p>
+  <div class="card text-center py-12">
+    <div class="text-5xl mb-3">🏷</div>
+    <p class="text-slate-500">No labels yet.</p>
+    <%= link_to "Create your first label!", new_label_path, class: "btn-primary inline-block mt-4" %>
+  </div>
 <% end %>

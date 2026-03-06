@@ -1,16 +1,29 @@
-<h1>📬 Friend Requests</h1>
+<div class="mb-6">
+  <h1 class="page-title">📬 Friend Requests</h1>
+  <p class="page-subtitle">People who want to connect with you</p>
+</div>
 
 <% if @pending.any? %>
-  <% @pending.each do |friendship| %>
-    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-      <span>
-        <%= link_to friendship.user.username, profile_path(friendship.user.username) %>
-        wants to be your friend
-      </span>
-      <%= button_to "Accept", accept_friendship_path(friendship), method: :patch,
-          style: "background:#22c55e; color:white; border:none; cursor:pointer; padding:6px 12px;" %>
-    </div>
-  <% end %>
+  <div class="space-y-3">
+    <% @pending.each do |friendship| %>
+      <div class="card flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+            <%= friendship.user.username.first.upcase %>
+          </div>
+          <div>
+            <%= link_to friendship.user.username, profile_path(friendship.user.username), class: "font-semibold text-slate-800 hover:text-indigo-600" %>
+            <p class="text-slate-500 text-sm">wants to be your friend</p>
+          </div>
+        </div>
+        <%= button_to "Accept ✓", accept_friendship_path(friendship), method: :patch, class: "btn-success text-sm py-1.5 px-4" %>
+      </div>
+    <% end %>
+  </div>
 <% else %>
-  <p>No pending requests.</p>
+  <div class="card text-center py-12">
+    <div class="text-5xl mb-3">📬</div>
+    <p class="text-slate-500">No pending requests.</p>
+    <%= link_to "← Back to Friends", friendships_path, class: "text-indigo-600 hover:underline text-sm mt-2 inline-block" %>
+  </div>
 <% end %>

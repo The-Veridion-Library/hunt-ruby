@@ -1,22 +1,35 @@
-<h1>You Found a Book! 🎉</h1>
-
-<% if @book.cover_image.present? %>
-  <img src="<%= @book.cover_image %>" alt="<%= @book.title %>" style="max-width: 200px;">
-<% end %>
-
-<h2><%= @book.title %></h2>
-<p><strong>Author:</strong> <%= @book.author %></p>
-<p><strong>ISBN:</strong> <%= @book.isbn %></p>
-<p><strong>Hidden by:</strong> <%= @book.user.username %></p>
-<p><strong>Location:</strong> <%= @label.location.name %></p>
-
-<%= form_with url: finds_path, method: :post do |f| %>
-  <%= hidden_field_tag :qr_token, @label.qr_code %>
-
-  <div>
-    <%= f.label :photo, "Upload a photo as proof (optional)" %>
-    <%= f.text_field :photo, placeholder: "Paste an image URL" %>
+<div class="max-w-lg mx-auto">
+  <div class="card text-center mb-6">
+    <div class="text-5xl mb-3">🎉</div>
+    <h1 class="text-2xl font-bold text-slate-900">You Found a Book!</h1>
+    <p class="text-slate-500 mt-1">Confirm your find to claim your points.</p>
   </div>
 
-  <%= f.submit "Confirm Find — Claim +10 Points!" %>
-<% end %>
+  <div class="card mb-6">
+    <% if @book.cover_image.present? %>
+      <img src="<%= @book.cover_image %>" alt="<%= @book.title %>" class="w-full h-48 object-cover rounded-xl mb-4">
+    <% else %>
+      <div class="w-full h-32 bg-slate-100 rounded-xl mb-4 flex items-center justify-center text-5xl">📖</div>
+    <% end %>
+    <h2 class="text-xl font-bold text-slate-900"><%= @book.title %></h2>
+    <p class="text-slate-500">by <%= @book.author %></p>
+    <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 text-sm">
+      <% if @book.isbn.present? %>
+        <div><span class="text-slate-400">ISBN</span><p class="font-medium"><%= @book.isbn %></p></div>
+      <% end %>
+      <div><span class="text-slate-400">Hidden by</span><p class="font-medium"><%= @book.user.username %></p></div>
+      <div><span class="text-slate-400">Location</span><p class="font-medium"><%= @label.location.name %></p></div>
+    </div>
+  </div>
+
+  <%= form_with url: finds_path, method: :post do |f| %>
+    <%= hidden_field_tag :qr_token, @label.qr_code %>
+    <div class="card">
+      <div class="form-group">
+        <%= f.label :photo, "Photo proof (optional)", class: "form-label" %>
+        <%= f.text_field :photo, placeholder: "Paste an image URL", class: "form-input" %>
+      </div>
+      <%= f.submit "Confirm Find — Claim +10 Points! 🎯", class: "btn-primary w-full mt-4" %>
+    </div>
+  <% end %>
+</div>

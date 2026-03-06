@@ -1,2 +1,35 @@
-<h1>Books#index</h1>
-<p>Find me in app/views/books/index.html.erb</p>
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="page-title">📚 Books</h1>
+    <p class="page-subtitle">All books in the hunt</p>
+  </div>
+  <%= link_to "Hide a Book", new_book_path, class: "btn-primary" %>
+</div>
+
+<% if @books&.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <% @books.each do |book| %>
+      <div class="card hover:shadow-md transition-shadow">
+        <% if book.cover_image.present? %>
+          <img src="<%= book.cover_image %>" alt="<%= book.title %>" class="w-full h-40 object-cover rounded-xl mb-4">
+        <% else %>
+          <div class="w-full h-40 bg-slate-100 rounded-xl mb-4 flex items-center justify-center text-4xl">📖</div>
+        <% end %>
+        <h2 class="font-semibold text-slate-800 leading-snug"><%= book.title %></h2>
+        <p class="text-slate-500 text-sm mt-0.5">by <%= book.author %></p>
+        <div class="flex items-center justify-between mt-4">
+          <span class="badge-pill <%= book.status == 'hidden' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' %>">
+            <%= book.status.capitalize %>
+          </span>
+          <%= link_to "View →", book_path(book), class: "text-indigo-600 hover:text-indigo-800 text-sm font-medium" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="card text-center py-12">
+    <div class="text-5xl mb-3">📚</div>
+    <p class="text-slate-500">No books yet. Be the first to hide one!</p>
+    <%= link_to "Hide a Book", new_book_path, class: "btn-primary inline-block mt-4" %>
+  </div>
+<% end %>

@@ -1,30 +1,28 @@
-<h1>Update Label #<%= @label.id %></h1>
+<div class="max-w-xl">
+  <h1 class="page-title">🏷 Create a Label</h1>
+  <p class="page-subtitle">Generate a QR code for a hidden book.</p>
 
-<%= form_with model: @label do |f| %>
-  <% if @label.errors.any? %>
-    <div style="color:red">
-      <% @label.errors.full_messages.each do |msg| %>
-        <p><%= msg %></p>
+  <div class="card">
+    <%= form_with model: @label do |f| %>
+      <% if @label.errors.any? %>
+        <div class="error-box">
+          <% @label.errors.full_messages.each do |msg| %><p>• <%= msg %></p><% end %>
+        </div>
       <% end %>
-    </div>
-  <% end %>
 
-  <div>
-    <%= f.label :book_id, "Book" %>
-    <%= f.collection_select :book_id, @books, :id, :title, {}, { required: true } %>
+      <div class="form-group">
+        <%= f.label :book_id, "Book", class: "form-label" %>
+        <%= f.collection_select :book_id, @books, :id, :title, { prompt: "Select a book" }, { required: true, class: "form-input" } %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :location_id, "Location", class: "form-label" %>
+        <%= f.collection_select :location_id, @locations, :id, :name, { prompt: "Select a location" }, { required: true, class: "form-input" } %>
+      </div>
+
+      <div class="mt-6">
+        <%= f.submit "Create Label", class: "btn-primary" %>
+      </div>
+    <% end %>
   </div>
-
-  <div>
-    <%= f.label :location_id, "Location" %>
-    <%= f.collection_select :location_id, @locations, :id, :name, {}, { required: true } %>
-  </div>
-
-  <div>
-    <%= f.label :status, "Status" %>
-    <%= f.select :status, Label::STATUSES.map { |s| [s.capitalize, s] }, {}, { required: true } %>
-  </div>
-
-  <%= f.submit "Update Label" %>
-<% end %>
-
-<%= link_to "Back to Label", label_path(@label) %>
+</div>

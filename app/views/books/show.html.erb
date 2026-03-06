@@ -1,13 +1,49 @@
-<h1><%= @book.title %></h1>
-<p><strong>Author:</strong> <%= @book.author %></p>
-<p><strong>ISBN:</strong> <%= @book.isbn %></p>
-<p><strong>Status:</strong> <%= @book.status %></p>
-<p><strong>Hidden by:</strong> <%= @book.user.username %></p>
+<div class="max-w-2xl">
+  <div class="card mb-6">
+    <% if @book.cover_image.present? %>
+      <img src="<%= @book.cover_image %>" alt="<%= @book.title %>" class="w-full h-64 object-cover rounded-xl mb-6">
+    <% else %>
+      <div class="w-full h-40 bg-slate-100 rounded-xl mb-6 flex items-center justify-center text-5xl">📖</div>
+    <% end %>
 
-<% if @label && @book.user == current_user %>
-  <h2>Your QR Code</h2>
-  <p>Print this and stick it inside the book cover!</p>
-  <%= raw @qr_svg %>
-<% end %>
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900"><%= @book.title %></h1>
+        <p class="text-slate-500 mt-1">by <span class="font-medium text-slate-700"><%= @book.author %></span></p>
+      </div>
+      <span class="badge-pill flex-shrink-0 <%= @book.status == 'hidden' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' %>">
+        <%= @book.status.capitalize %>
+      </span>
+    </div>
 
-<%= link_to "Hide another book", new_book_path %>
+    <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4 text-sm">
+      <% if @book.isbn.present? %>
+        <div>
+          <span class="text-slate-500">ISBN</span>
+          <p class="font-medium text-slate-800"><%= @book.isbn %></p>
+        </div>
+      <% end %>
+      <div>
+        <span class="text-slate-500">Hidden by</span>
+        <p class="font-medium text-slate-800"><%= link_to @book.user.username, profile_path(@book.user.username), class: "text-indigo-600 hover:underline" %></p>
+      </div>
+    </div>
+  </div>
+
+  <% if @label && @book.user == current_user %>
+    <div class="card print:shadow-none">
+      <h2 class="text-lg font-semibold text-slate-800 mb-1">🏷 Your QR Label</h2>
+      <p class="text-slate-500 text-sm mb-4">Print this and stick it inside the front cover of the book.</p>
+      <div class="flex justify-center p-4 bg-white border border-slate-200 rounded-xl">
+        <%= raw @qr_svg %>
+      </div>
+      <div class="mt-4 flex gap-3">
+        <button onclick="window.print()" class="btn-secondary text-sm">🖨 Print Label</button>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="mt-4">
+    <%= link_to "← Hide another book", new_book_path, class: "text-slate-500 hover:text-slate-700 text-sm" %>
+  </div>
+</div>

@@ -1,18 +1,31 @@
-<h1>👥 My Friends</h1>
-
-<%= link_to "Pending Requests", friendship_requests_path %>
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="page-title">👥 My Friends</h1>
+    <p class="page-subtitle"><%= @friends.count %> friend<%= @friends.count == 1 ? '' : 's' %></p>
+  </div>
+  <%= link_to "Pending Requests", friendship_requests_path, class: "btn-secondary text-sm" %>
+</div>
 
 <% if @friends.any? %>
-  <% @friends.each do |friendship| %>
-    <div style="border:1px solid #eee; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-      <span>
-        <%= link_to friendship.friend.username, profile_path(friendship.friend.username) %>
-        — <%= friendship.friend.points.to_i %> pts
-      </span>
-      <%= button_to "Remove", friendship_path(friendship), method: :delete,
-          style: "background:transparent; border:1px solid #ccc; cursor:pointer; padding:4px 8px;" %>
-    </div>
-  <% end %>
+  <div class="space-y-3">
+    <% @friends.each do |friendship| %>
+      <div class="card flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+            <%= friendship.friend.username.first.upcase %>
+          </div>
+          <div>
+            <%= link_to friendship.friend.username, profile_path(friendship.friend.username), class: "font-semibold text-slate-800 hover:text-indigo-600" %>
+            <p class="text-slate-500 text-sm"><%= friendship.friend.points.to_i %> pts</p>
+          </div>
+        </div>
+        <%= button_to "Remove", friendship_path(friendship), method: :delete, class: "btn-danger text-sm py-1.5 px-3" %>
+      </div>
+    <% end %>
+  </div>
 <% else %>
-  <p>No friends yet — visit someone's profile to add them!</p>
+  <div class="card text-center py-12">
+    <div class="text-5xl mb-3">👥</div>
+    <p class="text-slate-500">No friends yet — visit someone's profile to add them!</p>
+  </div>
 <% end %>

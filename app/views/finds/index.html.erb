@@ -1,17 +1,32 @@
-<h1>My Finds</h1>
+<div class="mb-6">
+  <h1 class="page-title">🎯 My Finds</h1>
+  <p class="page-subtitle">Every book you've tracked down</p>
+</div>
 
 <% if @finds.any? %>
-  <% @finds.each do |find| %>
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-      <h3><%= find.book.title %></h3>
-      <p><strong>Author:</strong> <%= find.book.author %></p>
-      <p><strong>Found at:</strong> <%= find.found_at.strftime("%B %d, %Y at %I:%M %p") %></p>
-      <p><strong>Points earned:</strong> +<%= find.points_awarded %></p>
-      <% if find.photo.present? %>
-        <img src="<%= find.photo %>" alt="Find photo" style="max-width: 200px;">
-      <% end %>
-    </div>
-  <% end %>
+  <div class="space-y-4">
+    <% @finds.each do |find| %>
+      <div class="card flex gap-4">
+        <% if find.photo.present? %>
+          <img src="<%= find.photo %>" alt="Find photo" class="w-20 h-20 object-cover rounded-xl flex-shrink-0">
+        <% else %>
+          <div class="w-20 h-20 bg-slate-100 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">📖</div>
+        <% end %>
+        <div class="flex-1 min-w-0">
+          <h2 class="font-semibold text-slate-800 truncate"><%= find.book.title %></h2>
+          <p class="text-slate-500 text-sm">by <%= find.book.author %></p>
+          <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+            <span>📅 <%= find.found_at.strftime("%B %d, %Y at %I:%M %p") %></span>
+            <span class="badge-pill bg-amber-100 text-amber-700">+<%= find.points_awarded %> pts</span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 <% else %>
-  <p>You haven't found any books yet. <%= link_to "Check the map!", map_path %></p>
+  <div class="card text-center py-12">
+    <div class="text-5xl mb-3">🗺️</div>
+    <p class="text-slate-500">You haven't found any books yet.</p>
+    <%= link_to "Check the map!", map_path, class: "btn-primary inline-block mt-4" %>
+  </div>
 <% end %>
