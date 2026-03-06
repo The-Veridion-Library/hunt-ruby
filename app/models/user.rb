@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  ROLES = %w[user admin].freeze
+
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
@@ -13,12 +15,22 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true, length: { minimum: 3, maximum: 30 }
   validates :points, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :role, inclusion: { in: ROLES }
 
   before_create :set_default_points
+  before_validation :set_default_role
+
+  def admin?
+    role == 'admin'
+  end
 
   private
 
   def set_default_points
     self.points ||= 0
+  end
+
+  def set_default_role
+    self.role ||= 'user'
   end
 end

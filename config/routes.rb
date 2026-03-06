@@ -16,8 +16,18 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :labels, only: [:index]
+    get 'stats', to: 'stats#index'
   end
 
   get '/map',         to: 'map#index',         as: :map
   get '/leaderboard', to: 'leaderboard#index', as: :leaderboard
+
+  namespace :admin do
+    root to: 'dashboard#index'
+    resources :users,     only: [:index, :show, :edit, :update, :destroy]
+    resources :books,     only: [:index, :show, :edit, :update, :destroy]
+    resources :labels,    only: [:index, :show, :update, :destroy]
+    resources :locations, only: [:index, :show, :edit, :update, :destroy]
+    resources :badges,    only: [:index, :new, :create, :edit, :update, :destroy]
+  end
 end

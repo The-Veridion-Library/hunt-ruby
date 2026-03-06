@@ -1,0 +1,31 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="page-title">📍 Locations</h1>
+</div>
+
+<div class="card p-0 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 border-b border-slate-100">
+      <tr>
+        <th class="text-left px-6 py-3 text-slate-500 font-medium">Name</th>
+        <th class="text-left px-6 py-3 text-slate-500 font-medium">Type</th>
+        <th class="text-left px-6 py-3 text-slate-500 font-medium">City</th>
+        <th class="text-left px-6 py-3 text-slate-500 font-medium">State</th>
+        <th class="px-6 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @locations.each do |location| %>
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-3 font-medium text-slate-800"><%= location.name %></td>
+          <td class="px-6 py-3"><span class="badge-pill bg-slate-100 text-slate-600"><%= location.location_type %></span></td>
+          <td class="px-6 py-3 text-slate-600"><%= location.city %></td>
+          <td class="px-6 py-3 text-slate-500"><%= location.state %></td>
+          <td class="px-6 py-3 text-right flex gap-2 justify-end">
+            <%= link_to "Edit", edit_admin_location_path(location), class: "text-indigo-600 hover:underline" %>
+            <%= button_to "Delete", admin_location_path(location), method: :delete, class: "text-red-500 hover:underline bg-transparent border-0 cursor-pointer p-0 text-sm", data: { confirm: "Delete this location?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

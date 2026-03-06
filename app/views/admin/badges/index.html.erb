@@ -1,0 +1,23 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="page-title">🏅 Badges</h1>
+  <%= link_to "New Badge", new_admin_badge_path, class: "btn-primary" %>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <% @badges.each do |badge| %>
+    <div class="card flex items-start justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <span class="text-3xl"><%= badge.icon %></span>
+        <div>
+          <h3 class="font-semibold text-slate-800"><%= badge.name %></h3>
+          <p class="text-slate-500 text-sm"><%= badge.description %></p>
+          <p class="text-slate-400 text-xs mt-1"><%= badge.badge_type %> · threshold: <%= badge.threshold %></p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1 flex-shrink-0">
+        <%= link_to "Edit", edit_admin_badge_path(badge), class: "text-indigo-600 text-sm hover:underline" %>
+        <%= button_to "Del", admin_badge_path(badge), method: :delete, class: "text-red-500 text-sm hover:underline bg-transparent border-0 cursor-pointer p-0", data: { confirm: "Delete badge?" } %>
+      </div>
+    </div>
+  <% end %>
+</div>

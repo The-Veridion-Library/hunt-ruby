@@ -1,0 +1,90 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+  <p class="text-slate-500 text-sm mt-1">App overview</p>
+</div>
+
+<!-- Stat cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="card">
+    <div class="text-3xl font-bold text-slate-800"><%= @stats[:total_users] %></div>
+    <div class="text-slate-500 text-sm mt-1">Total Users</div>
+    <div class="text-emerald-600 text-xs mt-0.5">+<%= @stats[:new_users_week] %> this week</div>
+  </div>
+  <div class="card">
+    <div class="text-3xl font-bold text-slate-800"><%= @stats[:total_books] %></div>
+    <div class="text-slate-500 text-sm mt-1">Total Books</div>
+    <div class="text-slate-400 text-xs mt-0.5"><%= @stats[:books_hidden] %> hidden · <%= @stats[:books_found] %> found</div>
+  </div>
+  <div class="card">
+    <div class="text-3xl font-bold text-slate-800"><%= @stats[:total_finds] %></div>
+    <div class="text-slate-500 text-sm mt-1">Total Finds</div>
+    <div class="text-slate-400 text-xs mt-0.5"><%= @stats[:finds_today] %> today · <%= @stats[:finds_week] %> this week</div>
+  </div>
+  <div class="card">
+    <div class="text-3xl font-bold text-slate-800"><%= @stats[:labels_by_status]['placed'] || 0 %></div>
+    <div class="text-slate-500 text-sm mt-1">Active Labels</div>
+    <div class="text-slate-400 text-xs mt-0.5"><%= @stats[:labels_by_status].values.sum %> total labels</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Recent finds -->
+  <div class="card p-0 overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h2 class="font-semibold text-slate-800">Recent Finds</h2>
+      <%= link_to "View all →", admin_books_path, class: "text-indigo-600 text-sm hover:underline" %>
+    </div>
+    <div class="divide-y divide-slate-100">
+      <% @recent_finds.each do |find| %>
+        <div class="px-6 py-3 flex items-center justify-between text-sm">
+          <div>
+            <span class="font-medium text-slate-800"><%= find.user.username %></span>
+            <span class="text-slate-500"> found </span>
+            <span class="font-medium text-slate-700"><%= find.book.title %></span>
+          </div>
+          <span class="text-slate-400 text-xs"><%= time_ago_in_words(find.found_at) %> ago</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent users + books -->
+  <div class="space-y-6">
+    <div class="card p-0 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">New Users</h2>
+        <%= link_to "View all →", admin_users_path, class: "text-indigo-600 text-sm hover:underline" %>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <% @recent_users.each do |user| %>
+          <div class="px-6 py-3 flex items-center justify-between text-sm">
+            <%= link_to user.username, admin_user_path(user), class: "font-medium text-slate-800 hover:text-indigo-600" %>
+            <div class="flex items-center gap-2">
+              <% if user.admin? %>
+                <span class="badge-pill bg-red-100 text-red-700 text-xs">admin</span>
+              <% end %>
+              <span class="text-slate-400 text-xs"><%= user.created_at.strftime("%b %d") %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card p-0 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">Recent Books</h2>
+        <%= link_to "View all →", admin_books_path, class: "text-indigo-600 text-sm hover:underline" %>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <% @recent_books.each do |book| %>
+          <div class="px-6 py-3 flex items-center justify-between text-sm">
+            <%= link_to book.title, admin_book_path(book), class: "font-medium text-slate-800 hover:text-indigo-600 truncate max-w-[180px]" %>
+            <span class="badge-pill <%= book.status == 'hidden' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' %> text-xs"><%= book.status %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+</div>
