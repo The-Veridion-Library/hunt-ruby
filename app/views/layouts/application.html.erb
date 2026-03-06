@@ -1,51 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>TVBH</title>
+    <title>TVBH — The Veridion Book Hunt</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-param" content="<%= request_forgery_protection_token %>">
     <meta name="csrf-token" content="<%= form_authenticity_token %>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application', defer: true %>
+    <%= vite_stylesheet_tag 'application', media: 'all' %>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
   </head>
-  <body>
-    <nav style="background:#222; padding:10px; color:white; display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-      <%= link_to "🏠 Home", root_path, style: "color:white;" %>
-      <%= link_to "🗺 Map", map_path, style: "color:white;" %>
-      <%= link_to "📚 Books", books_path, style: "color:white;" %>
-      <%= link_to "🏷 Labels", labels_path, style: "color:white;" %>
-      <%= link_to "📍 Locations", locations_path, style: "color:white;" %>
-      <%= link_to "🎯 My Finds", finds_path, style: "color:white;" %>
-      <%= link_to "🏆 Leaderboard", leaderboard_path, style: "color:white;" %>
+  <body class="bg-slate-50 text-slate-800 min-h-screen">
 
-      <% if user_signed_in? %>
-        <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
-        <%= link_to "👥 Friends#{pending_count > 0 ? " (#{pending_count})" : ""}", friendships_path, style: "color:white;" %>
-      <% end %>
+    <!-- Navigation -->
+    <nav class="bg-slate-900 fixed top-0 left-0 right-0 z-50 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
 
-      <span style="margin-left:auto;">
-        <% if user_signed_in? %>
-          <%= link_to "👤 #{current_user.username || current_user.email}", profile_path(current_user.username), style: "color:#aaa;" %>
-          &nbsp;
-          <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
-              style: "background:transparent; border:1px solid #aaa; color:white; cursor:pointer; padding:4px 10px;" %>
-        <% else %>
-          <%= link_to "Sign In", new_user_session_path, style: "color:white;" %>
-          &nbsp;
-          <%= link_to "Sign Up", new_user_registration_path, style: "color:white;" %>
-        <% end %>
-      </span>
+          <!-- Logo + desktop links -->
+          <div class="flex items-center gap-8">
+            <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg tracking-tight hover:text-amber-400 transition-colors" do %>
+              <span class="text-2xl">📖</span>
+              <span>TVBH</span>
+            <% end %>
+
+            <div class="hidden md:flex items-center gap-1">
+              <%= link_to "Map", map_path, class: "nav-link #{current_page?(map_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "Books", books_path, class: "nav-link #{current_page?(books_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "Labels", labels_path, class: "nav-link #{current_page?(labels_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "Locations", locations_path, class: "nav-link #{current_page?(locations_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "My Finds", finds_path, class: "nav-link #{current_page?(finds_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "Leaderboard", leaderboard_path, class: "nav-link #{current_page?(leaderboard_path) ? 'nav-link-active' : ''}" %>
+              <% if user_signed_in? %>
+                <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
+                <%= link_to friendships_path, class: "nav-link #{current_page?(friendships_path) ? 'nav-link-active' : ''} relative" do %>
+                  Friends
+                  <% if pending_count > 0 %>
+                    <span class="absolute -top-1 -right-2 bg-amber-400 text-slate-900 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center"><%= pending_count %></span>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Right: user / auth -->
+          <div class="flex items-center gap-3">
+            <% if user_signed_in? %>
+              <%= link_to profile_path(current_user.username), class: "flex items-center gap-2 text-slate-300 hover:text-white transition-colors text-sm font-medium" do %>
+                <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-sm">
+                  <%= (current_user.username || current_user.email).first.upcase %>
+                </div>
+                <span class="hidden sm:block"><%= current_user.username || current_user.email %></span>
+              <% end %>
+              <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
+                  class: "text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 text-sm px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-transparent" %>
+            <% else %>
+              <%= link_to "Sign In", new_user_session_path, class: "text-slate-300 hover:text-white text-sm font-medium transition-colors" %>
+              <%= link_to "Sign Up", new_user_registration_path, class: "bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors" %>
+            <% end %>
+
+            <!-- Mobile hamburger -->
+            <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-700 py-3 pb-4">
+          <div class="flex flex-col gap-1">
+            <%= link_to "🗺 Map", map_path, class: "mobile-nav-link" %>
+            <%= link_to "📚 Books", books_path, class: "mobile-nav-link" %>
+            <%= link_to "🏷 Labels", labels_path, class: "mobile-nav-link" %>
+            <%= link_to "📍 Locations", locations_path, class: "mobile-nav-link" %>
+            <%= link_to "🎯 My Finds", finds_path, class: "mobile-nav-link" %>
+            <%= link_to "🏆 Leaderboard", leaderboard_path, class: "mobile-nav-link" %>
+            <% if user_signed_in? %>
+              <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
+              <%= link_to "👥 Friends#{pending_count > 0 ? " (#{pending_count})" : ""}", friendships_path, class: "mobile-nav-link" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <div style="padding: 20px;">
+    <!-- Flash messages -->
+    <div class="fixed top-16 left-0 right-0 z-40 flex flex-col items-center gap-2 pt-3 px-4 pointer-events-none">
       <% if notice.present? %>
-        <p style="color:green;"><%= notice %></p>
+        <div class="pointer-events-auto bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-lg shadow-md text-sm font-medium max-w-lg w-full">
+          ✅ <%= notice %>
+        </div>
       <% end %>
       <% if alert.present? %>
-        <p style="color:red;"><%= alert %></p>
+        <div class="pointer-events-auto bg-red-50 border border-red-200 text-red-800 px-5 py-3 rounded-lg shadow-md text-sm font-medium max-w-lg w-full">
+          ⚠️ <%= alert %>
+        </div>
       <% end %>
-
-      <%= yield %>
     </div>
+
+    <!-- Main content -->
+    <main class="max-w-7xl mx-auto px-4 pt-24 pb-12">
+      <%= yield %>
+    </main>
+
   </body>
 </html>
