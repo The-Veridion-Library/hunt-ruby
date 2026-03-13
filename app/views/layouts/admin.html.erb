@@ -90,13 +90,40 @@
       'Address Validation', 'Suitability Assessment', 'Concerns'
     ];
 
+    const AI_HEADING_PATTERNS = [
+      { pattern: /Book\s*Lookup/i, canonical: 'Book Lookup' },
+      { pattern: /Policy\s*Check/i, canonical: 'Policy Check' },
+      { pattern: /Condition(?:\s*Assessment)?/i, canonical: 'Condition Assessment' },
+      { pattern: /Fraud\s*Signals/i, canonical: 'Fraud Signals' },
+      { pattern: /Recommendation/i, canonical: 'Recommendation' },
+      { pattern: /Venue\s*Research/i, canonical: 'Venue Research' },
+      { pattern: /Chain\s*or\s*Independent\??/i, canonical: 'Chain or Independent?' },
+      { pattern: /Existing\s*Book\s*Programs/i, canonical: 'Existing Book Programs' },
+      { pattern: /Address\s*Validation/i, canonical: 'Address Validation' },
+      { pattern: /Suitability\s*Assessment/i, canonical: 'Suitability Assessment' },
+      { pattern: /Concerns/i, canonical: 'Concerns' }
+    ];
+
     function fixAiHeadings(text) {
-      let fixed = text;
+      let fixed = (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      fixed = fixed.replace(/([^\n])(##\s*)/g, '$1\n\n$2');
+
+      AI_HEADING_PATTERNS.forEach(({ pattern, canonical }) => {
+        fixed = fixed.replace(new RegExp(`^\\s*##\\s*${pattern.source}\\s*:?([^\\n]*)$`, 'gim'), (_match, trailing) => {
+          const tail = (trailing || '').trim();
+          return tail ? `## ${canonical}\n\n${tail}` : `## ${canonical}`;
+        });
+      });
+
       AI_HEADINGS.forEach(h => {
         fixed = fixed
           .replace(new RegExp(`([^\\n])(## ${h})`, 'g'), '$1\n\n$2')
           .replace(new RegExp(`(## ${h})([^\\n])`, 'g'), '$1\n\n$2');
       });
+
+      fixed = fixed.replace(/^\s*~\s+/gm, '- ');
+      fixed = fixed.replace(/([.!?:])\s*-\s+(?=[A-Z0-9])/g, '$1\n- ');
+      fixed = fixed.replace(/\n{3,}/g, '\n\n').trim();
       return fixed;
     }
 

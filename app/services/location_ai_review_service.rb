@@ -3,7 +3,7 @@ require 'json'
 
 class LocationAiReviewService
   HACK_CLUB_AI_URL = 'https://ai.hackclub.com/proxy/v1/chat/completions'.freeze
-  MODEL            = 'google/gemini-2.5-flash'.freeze
+  MODEL            = 'qwen/qwen3-next-80b-a3b-instruct'.freeze
 
   def initialize(location)
     @location = location
@@ -83,6 +83,9 @@ class LocationAiReviewService
 
       Do NOT make final approve/decline decisions — only surface findings and flag concerns.
       Be concise. Use plain language. Format your response using Markdown with ## headers and bullet points.
+      For bullet points, use "~ " at the start of each bullet line (NOT "- ").
+      Never use hyphen bullets. Hyphens may appear inside names/addresses and should stay plain text.
+      If you need an inline separator in prose, use an em dash (—) instead of a hyphen (-).
 
       ---
       LOCATION SUBMISSION:
@@ -94,7 +97,7 @@ class LocationAiReviewService
       Nomination notes: #{@location.nomination_notes.presence || 'None'}
 
       ---
-      YOUR REVIEW — respond in exactly this Markdown format. IMPORTANT: always put a blank line between a heading and its content, and between sections:
+      YOUR REVIEW — respond in exactly this Markdown format. IMPORTANT: always put a blank line between a heading and its content, and between sections. Use "~ " bullets where needed:
 
       ## Venue Research
 

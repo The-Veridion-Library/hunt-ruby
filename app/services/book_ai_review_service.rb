@@ -33,7 +33,7 @@ POLICY
 
 class BookAiReviewService
   HACK_CLUB_AI_URL = 'https://ai.hackclub.com/proxy/v1/chat/completions'.freeze
-  MODEL            = 'google/gemini-2.5-flash'.freeze
+  MODEL            = 'qwen/qwen3-next-80b-a3b-instruct'.freeze
 
   def initialize(book)
     @book = book
@@ -104,6 +104,9 @@ class BookAiReviewService
 
       Do NOT make final approve/reject decisions — only surface findings and flag concerns.
       Be concise. Use plain language. Format your response using Markdown with ## headers and bullet points.
+      For bullet points, use "~ " at the start of each bullet line (NOT "- ").
+      Never use hyphen bullets. Hyphens may appear inside titles/subtitles and should stay plain text.
+      If you need an inline separator in prose, use an em dash (—) instead of a hyphen (-).
 
       ---
       CONTENT POLICY:
@@ -119,7 +122,7 @@ class BookAiReviewService
       Submission notes from user: #{@book.submission_notes.presence || 'None'}
 
       ---
-      YOUR REVIEW — respond in exactly this Markdown format. IMPORTANT: always put a blank line between a heading and its content, and between sections:
+      YOUR REVIEW — respond in exactly this Markdown format. IMPORTANT: always put a blank line between a heading and its content, and between sections. Use "~ " bullets where needed:
 
       ## Book Lookup
 
