@@ -13,10 +13,12 @@ class Book < ApplicationRecord
 
   validates :title,  presence: true
   validates :author, presence: true
+  validates :isbn, presence: true, format: { with: /\A(?:\d{10}|\d{13})\z/, message: "must be 10 or 13 digits" }
   validates :status, inclusion: { in: STATUSES }
   validates :submission_status, inclusion: { in: SUBMISSION_STATUSES }
   validates :book_condition, inclusion: { in: CONDITIONS }, allow_blank: true
 
+  before_validation :normalize_isbn
   before_validation :set_defaults
 
   scope :approved,       -> { where(submission_status: 'approved') }
@@ -38,6 +40,10 @@ class Book < ApplicationRecord
   end
 
   private
+
+  def normalize_isbn
+    self.isbn = isbn.to_s.gsub(/\D/, '') if isbn.present?
+  end
 
   def set_defaults
     # status reflects hide/found state, separate from submission pipeline

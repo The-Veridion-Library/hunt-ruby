@@ -18,9 +18,26 @@ class BooksController < ApplicationController
     session.delete(:book_prefill) if params[:reset]
   end
 
-  # Step 1 → Step 2: Look up ISBN, store in session, render prefill form
+  # Step 2: Look up/review ISBN details
   def isbn_lookup
+    if request.get?
+      prefill = session[:book_prefill]
+      unless prefill
+        redirect_to new_book_path
+        return
+      end
+
+      @prefill = prefill
+      @ol_found = prefill['title'].present?
+      return render :isbn_lookup
+    end
+
     isbn = params[:isbn].to_s.gsub(/\D/, '')
+
+    if isbn.blank?
+      flash.now[:alert] = "ISBN is required."
+      return render :new, status: :unprocessable_entity
+    end
 
     if isbn.length != 13 && isbn.length != 10
       flash.now[:alert] = "Please enter a valid ISBN-10 or ISBN-13."
@@ -37,15 +54,54 @@ class BooksController < ApplicationController
       'maturity_rating' => data[:maturity_rating]
     }
 
-    @prefill   = session[:book_prefill]
-    @book      = Book.new(title: @prefill['title'], author: @prefill['author'], isbn: @prefill['isbn'])
-    @locations = Location.partners.order(:name)
-    @ol_found  = data[:found]
-
-    render :new_details
+    @prefill = session[:book_prefill]
+    @ol_found = data[:found]
+    render :isbn_lookup
   end
 
-  # Step 2: Full submission form
+  # Step 2 → Step 3: Confirm/edit fetched details
+  def confirm_isbn_lookup
+    prefill = session[:book_prefill]
+    unless prefill
+      redirect_to new_book_path
+      return
+    end
+
+    isbn = params[:isbn].to_s.gsub(/\D/, '')
+    title = params[:title].to_s.strip
+    author = params[:author].to_s.strip
+
+    if isbn.blank?
+      flash.now[:alert] = "ISBN is required."
+      @prefill = prefill.merge('isbn' => isbn, 'title' => title, 'author' => author)
+      @ol_found = @prefill['title'].present?
+      return render :isbn_lookup, status: :unprocessable_entity
+    end
+
+    if isbn.length != 13 && isbn.length != 10
+      flash.now[:alert] = "Please enter a valid ISBN-10 or ISBN-13."
+      @prefill = prefill.merge('isbn' => isbn, 'title' => title, 'author' => author)
+      @ol_found = @prefill['title'].present?
+      return render :isbn_lookup, status: :unprocessable_entity
+    end
+
+    if title.blank? || author.blank?
+      flash.now[:alert] = "Title and author are required before continuing."
+      @prefill = prefill.merge('isbn' => isbn, 'title' => title, 'author' => author)
+      @ol_found = @prefill['title'].present?
+      return render :isbn_lookup, status: :unprocessable_entity
+    end
+
+    session[:book_prefill] = prefill.merge(
+      'isbn' => isbn,
+      'title' => title,
+      'author' => author
+    )
+
+    redirect_to new_details_books_path
+  end
+
+  # Step 3: Full submission form
   def new_details
     prefill = session[:book_prefill]
     unless prefill
@@ -60,6 +116,18 @@ class BooksController < ApplicationController
 
   def create
     @book = current_user.books.build(book_params)
+    if @book.title.blank? && session.dig(:book_prefill, 'title').present?
+      @book.title = session[:book_prefill]['title']
+    end
+    if @book.author.blank? && session.dig(:book_prefill, 'author').present?
+      @book.author = session[:book_prefill]['author']
+    end
+    if @book.isbn.blank? && session.dig(:book_prefill, 'isbn').present?
+      @book.isbn = session[:book_prefill]['isbn']
+    end
+    if @book.cover_image.blank? && session.dig(:book_prefill, 'cover').present?
+      @book.cover_image = session[:book_prefill]['cover']
+    end
     # Carry maturity_rating from prefill if not in params
     if @book.maturity_rating.blank? && session.dig(:book_prefill, 'maturity_rating').present?
       @book.maturity_rating = session[:book_prefill]['maturity_rating']
@@ -116,7 +184,7 @@ class BooksController < ApplicationController
     params.require(:book).permit(
       :title, :author, :isbn,
       :book_condition,
-      :front_cover, :back_cover,
+      :cover_image, :front_cover, :back_cover,
       :submission_notes,
       :preferred_location_id,
       :maturity_rating

@@ -1,0 +1,114 @@
+<%# Step 2: Review/edit fetched book details %>
+<div class="max-w-2xl">
+  <div class="flex items-center gap-3 mb-6">
+    <%= link_to "← Back", new_book_path, class: "text-slate-400 hover:text-slate-600 text-sm" %>
+    <div class="flex-1"></div>
+    <span class="text-sm text-slate-400">Step <span class="font-bold text-slate-600">2</span> of 3 — Review details</span>
+    <div class="flex gap-2">
+      <span class="w-8 h-1.5 rounded-full bg-slate-200"></span>
+      <span class="w-8 h-1.5 rounded-full bg-indigo-500"></span>
+      <span class="w-8 h-1.5 rounded-full bg-slate-200"></span>
+    </div>
+  </div>
+
+  <h1 class="page-title">📚 Review Book Details</h1>
+  <p class="page-subtitle">This is what we fetched from ISBN lookup. Edit anything if needed, then continue.</p>
+
+  <% if alert.present? %>
+    <div class="error-box mb-4"><p>⚠️ <%= alert %></p></div>
+  <% end %>
+  <% if flash.now[:alert].present? %>
+    <div class="error-box mb-4"><p>⚠️ <%= flash.now[:alert] %></p></div>
+  <% end %>
+
+  <% if @ol_found %>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4 mb-5 flex gap-4 items-start">
+      <% if @prefill&.dig('cover').present? %>
+        <img src="<%= @prefill['cover'] %>" class="w-14 h-20 object-cover rounded shadow-sm flex-shrink-0" alt="Cover">
+      <% else %>
+        <span class="text-3xl flex-shrink-0">✅</span>
+      <% end %>
+      <div>
+        <p class="font-semibold text-emerald-800 text-sm">Book details found</p>
+        <p class="text-emerald-700 text-sm mt-0.5">These values will be used for submission unless you edit them below.</p>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-amber-50 border border-amber-100 rounded-xl px-5 py-4 mb-5 flex gap-3 items-start">
+      <span class="text-xl flex-shrink-0">⚠️</span>
+      <div>
+        <p class="font-semibold text-amber-800 text-sm">No full match found</p>
+        <p class="text-amber-700 text-sm mt-0.5">Please fill in title and author before continuing.</p>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <%= form_with url: confirm_isbn_lookup_books_path, method: :post do |f| %>
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <div class="flex gap-2 items-start">
+            <%= f.text_field :title,
+                value: @prefill&.dig('title'),
+                required: true,
+                readonly: true,
+                class: "form-input flex-1",
+                placeholder: "e.g. The Hobbit",
+                data: { editable_input: "title" } %>
+            <button type="button" class="btn-secondary px-3" data-edit-target="title" aria-label="Edit title">✏️</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Author</label>
+          <div class="flex gap-2 items-start">
+            <%= f.text_field :author,
+                value: @prefill&.dig('author'),
+                required: true,
+                readonly: true,
+                class: "form-input flex-1",
+                placeholder: "e.g. J.R.R. Tolkien",
+                data: { editable_input: "author" } %>
+            <button type="button" class="btn-secondary px-3" data-edit-target="author" aria-label="Edit author">✏️</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ISBN-10 or ISBN-13</label>
+          <div class="flex gap-2 items-start">
+            <%= f.text_field :isbn,
+                value: @prefill&.dig('isbn'),
+                required: true,
+                readonly: true,
+                class: "form-input flex-1 font-mono",
+                placeholder: "9780000000000 or 0000000000",
+                inputmode: "numeric",
+                data: { editable_input: "isbn" } %>
+            <button type="button" class="btn-secondary px-3" data-edit-target="isbn" aria-label="Edit ISBN">✏️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 mt-6 pt-5 border-t border-slate-100">
+        <%= f.submit "Next →", class: "btn-primary" %>
+        <%= link_to "Start over", new_book_path(reset: true), class: "btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-edit-target]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var target = button.getAttribute("data-edit-target");
+        var input = document.querySelector('[data-editable-input="' + target + '"]');
+        if (!input) return;
+        input.readOnly = false;
+        input.focus();
+        if (typeof input.select === "function") input.select();
+      });
+    });
+  });
+</script>

@@ -3,7 +3,7 @@
   <div class="text-center mb-8">
     <p class="text-4xl mb-3">📚</p>
     <h1 class="text-2xl font-bold text-slate-800">Submit a Book</h1>
-    <p class="text-slate-500 mt-1">Start by entering the book's ISBN-13. We'll look it up automatically.</p>
+    <p class="text-slate-500 mt-1">Enter the book's ISBN-10 or ISBN-13 (required). We'll look it up automatically.</p>
   </div>
 
   <div class="card">
@@ -16,29 +16,29 @@
       <% end %>
 
       <div class="form-group">
-        <label class="form-label text-base">ISBN-13</label>
-        <p class="text-slate-400 text-xs mb-2">Found on the back cover barcode — 13 digits, usually starting with 978 or 979.</p>
+        <label class="form-label text-base">ISBN-10 or ISBN-13</label>
+        <p class="text-slate-400 text-xs mb-2">Required. Found near the barcode on the back cover — enter 10 or 13 digits.</p>
         <%= f.text_field :isbn,
             class: "form-input text-lg font-mono tracking-widest",
-            placeholder: "9780000000000",
+          placeholder: "9780000000000 or 0000000000",
             maxlength: 17,
             autofocus: true,
             inputmode: "numeric",
+            required: true,
             value: params[:isbn] %>
       </div>
 
-      <div class="flex gap-3 mt-2">
-        <%= f.submit "Look Up Book →", class: "btn-primary flex-1 text-center" %>
-        <%= link_to "Skip →", new_details_books_path, class: "btn-secondary text-center" %>
+      <div class="mt-2">
+        <%= f.submit "Look Up Book →", class: "btn-primary w-full text-center" %>
       </div>
-      <p class="text-slate-400 text-xs text-center mt-3">Don't have the ISBN? Click <strong>Skip</strong> to enter the details manually.</p>
     <% end %>
   </div>
 
   <div class="text-center mt-6 text-sm text-slate-400">
-    <p>Step <span class="font-bold text-slate-600">1</span> of 2 — Book lookup</p>
+    <p>Step <span class="font-bold text-slate-600">1</span> of 3 — Enter ISBN</p>
     <div class="flex justify-center gap-2 mt-2">
       <span class="w-8 h-1.5 rounded-full bg-indigo-500"></span>
+      <span class="w-8 h-1.5 rounded-full bg-slate-200"></span>
       <span class="w-8 h-1.5 rounded-full bg-slate-200"></span>
     </div>
   </div>

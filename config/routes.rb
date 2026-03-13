@@ -5,7 +5,9 @@ Rails.application.routes.draw do
   resources :books, only: [:index, :new, :create, :show] do
     member     { post :report }
     collection do
+      get  :isbn_lookup
       post :isbn_lookup
+      post :confirm_isbn_lookup
       get  :new_details
     end
   end
