@@ -1,2 +1,1 @@
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\tvbh; rails server"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\tvbh; bundle exec vite dev"
+wt -d "D:\tvbh" --title "Rails Server" pwsh -NoExit -Command "rails server" `; nt -d "D:\tvbh" --title "Vite Server" pwsh -NoExit -Command "bundle exec vite dev"

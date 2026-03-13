@@ -16,9 +16,9 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true, length: { minimum: 3, maximum: 30 }
   validates :points, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :role, inclusion: { in: ROLES }
+  validates :public_id, presence: true, uniqueness: true
 
-  before_create :set_default_points
-  before_validation :set_default_role
+  before_create :set_defaults
 
   def admin?
     role == 'admin'
@@ -26,11 +26,16 @@ class User < ApplicationRecord
 
   private
 
-  def set_default_points
-    self.points ||= 0
+  def set_defaults
+    self.points    ||= 0
+    self.role      ||= 'user'
+    self.public_id ||= generate_public_id
   end
 
-  def set_default_role
-    self.role ||= 'user'
+  def generate_public_id
+    loop do
+      id = "user_#{SecureRandom.hex(8)}"
+      break id unless User.exists?(public_id: id)
+    end
   end
 end

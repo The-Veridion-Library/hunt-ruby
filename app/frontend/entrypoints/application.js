@@ -1,7 +1,8 @@
 import { mount } from 'svelte'
-import Hello from '../components/Hello.svelte'
+import Stats from '../components/Stats.svelte'
 
-mount(Hello, {
-  target: document.getElementById('svelte-app'),
-  props: { name: 'Book Hunter' }
-})
+// Mount the stats widget on the logged-out landing page (if the target exists)
+const statsTarget = document.getElementById('svelte-stats')
+if (statsTarget) {
+  mount(Stats, { target: statsTarget })
+}

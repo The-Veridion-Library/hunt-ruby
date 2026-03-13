@@ -6,6 +6,13 @@ class HomeController < ApplicationController
                   .includes(:user, :book)
                   .order(found_at: :desc)
                   .limit(20)
+
+      @my_pending  = current_user.books.pending_review.order(created_at: :desc).limit(5)
+      @my_rejected = current_user.books.rejected.order(updated_at: :desc).limit(3)
+
+      @featured_books = Book.approved.order(created_at: :desc).limit(6)
+    else
+      @featured_books = Book.approved.order(created_at: :desc).limit(6)
     end
   end
 end

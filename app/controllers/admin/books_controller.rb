@@ -1,5 +1,5 @@
 class Admin::BooksController < Admin::BaseController
-  before_action :set_book, only: [:show, :edit, :update, :destroy, :approve, :reject, :flag, :unflag]
+  before_action :set_book, only: [:show, :edit, :update, :destroy, :approve, :reject, :flag, :unflag, :trigger_ai_review, :stream_ai_review]
 
   def index
     @books = Book.includes(:user).order(created_at: :desc)
@@ -32,13 +32,8 @@ class Admin::BooksController < Admin::BaseController
 
   def approve
     @book.update!(submission_status: 'approved')
-    # Create the label now that we've approved — use preferred location if set
     if @book.preferred_location_id.present? && @book.labels.none?
-      Label.create!(
-        book:     @book,
-        location: @book.preferred_location,
-        user:     @book.user
-      )
+      Label.create!(book: @book, location: @book.preferred_location, user: @book.user)
     end
     redirect_back fallback_location: admin_book_path(@book), notice: "✅ Book approved! Label created."
   end
@@ -57,6 +52,37 @@ class Admin::BooksController < Admin::BaseController
   def unflag
     @book.update!(flagged: false)
     redirect_back fallback_location: admin_books_path, notice: "Flag cleared."
+  end
+
+  def trigger_ai_review
+    @book.update_columns(ai_review: nil, ai_reviewed_at: nil)
+    BookAiReviewJob.perform_later(@book.id)
+    redirect_back fallback_location: admin_book_path(@book), notice: "🤖 AI review triggered."
+  end
+
+  def stream_ai_review
+    @book.update_columns(ai_review: nil, ai_reviewed_at: nil)
+
+    response.headers['Content-Type']  = 'text/event-stream'
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['X-Accel-Buffering'] = 'no'
+
+    accumulated = ''
+
+    begin
+      BookAiReviewService.new(@book).stream do |chunk|
+        accumulated += chunk.to_s
+        sse_data = chunk.to_s.gsub("\n", "\\n").gsub('\"', '\\"')
+        response.stream.write("data: #{sse_data}\n\n")
+      end
+      normalized = normalize_ai_markdown(accumulated)
+      @book.update_columns(ai_review: normalized, ai_reviewed_at: Time.current)
+      response.stream.write("data: [DONE]\n\n")
+    rescue => e
+      response.stream.write("data: [ERROR] #{e.message}\n\n")
+    ensure
+      response.stream.close
+    end
   end
 
   private

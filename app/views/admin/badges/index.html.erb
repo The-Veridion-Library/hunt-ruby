@@ -3,6 +3,28 @@
   <%= link_to "New Badge", new_admin_badge_path, class: "btn-primary" %>
 </div>
 
+<%# Per-badge delete modals %>
+<% @badges.each do |badge| %>
+  <%= render "shared/modal",
+        id: "modal-delete-badge-#{badge.id}",
+        title: "Delete "#{badge.name}"?",
+        body: "This badge will be removed from all #{badge.users.count} holder(s). This cannot be undone.",
+        confirm_label: "Delete Badge",
+        confirm_class: "btn-danger",
+        form_action: admin_badge_path(badge),
+        form_method: :delete %>
+  <% badge.user_badges.each do |ub| %>
+    <%= render "shared/modal",
+          id: "modal-revoke-ub-#{ub.id}",
+          title: "Revoke badge from #{ub.user.username}?",
+          body: "The "#{badge.name}" badge will be removed from this user.",
+          confirm_label: "Revoke",
+          confirm_class: "btn-danger",
+          form_action: admin_badge_user_badge_path(badge, ub),
+          form_method: :delete %>
+  <% end %>
+<% end %>
+
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
   <% @badges.each do |badge| %>
     <div class="card">
@@ -26,7 +48,9 @@
         <div class="flex flex-col gap-1 flex-shrink-0 text-right">
           <%= link_to "Edit", edit_admin_badge_path(badge), class: "text-indigo-600 text-sm hover:underline" %>
           <% if badge.deletable? %>
-            <%= button_to "Delete", admin_badge_path(badge), method: :delete, class: "text-red-500 text-sm hover:underline bg-transparent border-0 cursor-pointer p-0", data: { confirm: "Delete badge?" } %>
+            <button type="button"
+                    onclick="document.getElementById('modal-delete-badge-<%= badge.id %>').showModal()"
+                    class="text-red-500 text-sm hover:underline bg-transparent border-0 cursor-pointer p-0 text-right">Delete</button>
           <% end %>
         </div>
       </div>
@@ -36,13 +60,12 @@
         <p class="text-xs text-slate-500 font-medium mb-2"><%= badge.users.count %> holder<%= badge.users.count == 1 ? '' : 's' %></p>
         <% if badge.users.any? %>
           <div class="flex flex-wrap gap-1 mb-3">
-            <% badge.users.first(6).each do |user| %>
+            <% badge.user_badges.includes(:user).first(6).each do |ub| %>
               <div class="flex items-center gap-1 bg-slate-50 rounded-full px-2 py-0.5 text-xs">
-                <%= link_to user.username, admin_user_path(user), class: "text-slate-600 hover:text-indigo-600" %>
-                <%= button_to "×", admin_badge_user_badge_path(badge, UserBadge.find_by(user: user, badge: badge)),
-                    method: :delete,
-                    class: "text-red-400 hover:text-red-600 bg-transparent border-0 cursor-pointer p-0 ml-0.5",
-                    data: { confirm: "Revoke this badge from #{user.username}?" } %>
+                <%= link_to ub.user.username, admin_user_path(ub.user), class: "text-slate-600 hover:text-indigo-600" %>
+                <button type="button"
+                        onclick="document.getElementById('modal-revoke-ub-<%= ub.id %>').showModal()"
+                        class="text-red-400 hover:text-red-600 bg-transparent border-0 cursor-pointer p-0 ml-0.5">×</button>
               </div>
             <% end %>
             <% if badge.users.count > 6 %>

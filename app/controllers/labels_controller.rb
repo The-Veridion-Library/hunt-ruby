@@ -8,8 +8,8 @@ class LabelsController < ApplicationController
 
   def new
     @label = Label.new
-    @books = current_user.books.order(:title)
-    @locations = Location.all.order(:name)
+    @books     = current_user.books.approved.order(:title)
+    @locations = Location.partners.order(:name)
   end
 
   def create
@@ -19,8 +19,8 @@ class LabelsController < ApplicationController
     if @label.save
       redirect_to label_path(@label), notice: "Label created! Ready to print."
     else
-      @books = current_user.books.order(:title)
-      @locations = Location.all.order(:name)
+      @books     = current_user.books.approved.order(:title)
+      @locations = Location.partners.order(:name)
       render :new, status: :unprocessable_entity
     end
   end
@@ -37,16 +37,16 @@ class LabelsController < ApplicationController
   end
 
   def edit
-    @books = current_user.books.order(:title)
-    @locations = Location.all.order(:name)
+    @books     = current_user.books.approved.order(:title)
+    @locations = Location.partners.order(:name)
   end
 
   def update
     if @label.update(label_params)
       redirect_to label_path(@label), notice: "Label updated!"
     else
-      @books = current_user.books.order(:title)
-      @locations = Location.all.order(:name)
+      @books     = current_user.books.approved.order(:title)
+      @locations = Location.partners.order(:name)
       render :edit, status: :unprocessable_entity
     end
   end

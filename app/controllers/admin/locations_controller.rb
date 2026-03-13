@@ -1,5 +1,5 @@
 class Admin::LocationsController < Admin::BaseController
-  before_action :set_location, only: [:show, :edit, :update, :destroy, :set_status]
+  before_action :set_location, only: [:show, :edit, :update, :destroy, :set_status, :trigger_ai_review, :stream_ai_review]
 
   def index
     @locations = Location.includes(:nominator).order(:nomination_status, :name)
@@ -28,6 +28,37 @@ class Admin::LocationsController < Admin::BaseController
     else
       @location.destroy
       redirect_to admin_locations_path, notice: "Location deleted."
+    end
+  end
+
+  def trigger_ai_review
+    @location.update_columns(ai_review: nil, ai_reviewed_at: nil)
+    LocationAiReviewJob.perform_later(@location.id)
+    redirect_back fallback_location: admin_location_path(@location), notice: "🤖 AI review triggered."
+  end
+
+  def stream_ai_review
+    @location.update_columns(ai_review: nil, ai_reviewed_at: nil)
+
+    response.headers['Content-Type']  = 'text/event-stream'
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['X-Accel-Buffering'] = 'no'
+
+    accumulated = ''
+
+    begin
+      LocationAiReviewService.new(@location).stream do |chunk|
+        accumulated += chunk.to_s
+        sse_data = chunk.to_s.gsub("\n", "\\n").gsub('\"', '\\"')
+        response.stream.write("data: #{sse_data}\n\n")
+      end
+      normalized = normalize_ai_markdown(accumulated)
+      @location.update_columns(ai_review: normalized, ai_reviewed_at: Time.current)
+      response.stream.write("data: [DONE]\n\n")
+    rescue => e
+      response.stream.write("data: [ERROR] #{e.message}\n\n")
+    ensure
+      response.stream.close
     end
   end
 

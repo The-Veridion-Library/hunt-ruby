@@ -26,6 +26,7 @@ class LocationsController < ApplicationController
     end
 
     if @location.save
+      LocationAiReviewJob.perform_later(@location.id)
       redirect_to locations_path, notice: "Thanks for the nomination! We'll reach out to #{@location.name} and keep you posted."
     else
       render :new, status: :unprocessable_entity

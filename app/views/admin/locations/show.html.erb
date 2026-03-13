@@ -43,6 +43,60 @@
   </div>
 
   <div class="col-span-2 space-y-4">
+
+    <%# AI Review Panel — streaming %>
+    <div class="card" id="ai-panel">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-semibold text-slate-800">🤖 AI Pre-Screen</h2>
+        <div class="flex items-center gap-2">
+          <span id="ai-reviewed-at" class="text-xs text-slate-400">
+            <% if @location.ai_reviewed? %>Reviewed <%= @location.ai_reviewed_at.strftime("%b %d at %H:%M") %><% end %>
+          </span>
+          <button id="ai-run-btn"
+                  onclick="startAiStream('<%= stream_ai_review_admin_location_path(@location) %>', 'location')"
+                  class="btn-secondary text-xs py-1 px-2.5">
+            <%= @location.ai_reviewed? ? "↻ Re-run" : "▶ Run Review" %>
+          </button>
+        </div>
+      </div>
+
+      <div id="ai-rec-pill" class="mb-3 <%= @location.ai_review.present? ? '' : 'hidden' %>">
+        <%
+          keyword = if @location.ai_review.to_s.include?('LOOKS GOOD') then 'LOOKS GOOD'
+                    elsif @location.ai_review.to_s.include?('LIKELY DECLINE') then 'LIKELY DECLINE'
+                    elsif @location.ai_review.to_s.include?('NEEDS HUMAN ATTENTION') then 'NEEDS HUMAN ATTENTION'
+                    end
+          rec_class = case keyword
+                      when 'LOOKS GOOD'            then 'bg-emerald-100 text-emerald-700'
+                      when 'LIKELY DECLINE'         then 'bg-red-100 text-red-700'
+                      when 'NEEDS HUMAN ATTENTION'  then 'bg-amber-100 text-amber-700'
+                      else                              'bg-slate-100 text-slate-600'
+                      end
+        %>
+        <span id="ai-rec-badge" class="badge-pill <%= rec_class %> text-sm px-3 py-1 font-semibold">
+          <%= keyword || '' %>
+        </span>
+      </div>
+
+      <div id="ai-content-area"
+           class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 overflow-auto max-h-[32rem] prose-ai <%= @location.ai_review.present? ? '' : 'hidden' %>">
+        <div id="ai-md-output"></div>
+      </div>
+
+      <div id="ai-streaming-indicator" class="hidden flex items-center gap-2 text-slate-400 text-sm py-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+        <span>AI is thinking…</span>
+      </div>
+
+      <div id="ai-empty-state" class="<%= @location.ai_review.present? ? 'hidden' : '' %>">
+        <p class="text-slate-400 text-sm py-2">No AI review yet. Click <strong>▶ Run Review</strong> to start live streaming.</p>
+      </div>
+
+      <% if @location.ai_review.present? %>
+        <script>document.addEventListener('DOMContentLoaded', () => renderAiMarkdown("<%= j @location.ai_review %>", 'location'));</script>
+      <% end %>
+    </div>
+
     <%# Status pipeline %>
     <div class="card">
       <h2 class="text-base font-semibold text-slate-800 mb-4">Partnership Status</h2>
@@ -86,7 +140,6 @@
       </div>
     </div>
 
-    <%# Books at this location %>
     <div class="card p-0 overflow-hidden">
       <div class="px-5 py-3 border-b border-slate-100 font-semibold text-slate-800">Books here (<%= @labels.count %>)</div>
       <% if @labels.any? %>

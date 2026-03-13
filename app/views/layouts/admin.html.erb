@@ -11,7 +11,18 @@
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application', defer: true %>
     <%= vite_stylesheet_tag 'application', media: 'all' %>
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      /* AI markdown prose styles */
+      .prose-ai h2 { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+      .prose-ai p  { margin: 0.35rem 0; line-height: 1.6; }
+      .prose-ai ul { list-style: disc; padding-left: 1.25rem; margin: 0.35rem 0; }
+      .prose-ai li { margin: 0.2rem 0; }
+      .prose-ai strong { font-weight: 600; color: #334155; }
+      .prose-ai code { background: #f1f5f9; border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
+    </style>
+    <!-- marked.js for markdown rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   </head>
   <body class="bg-slate-100 min-h-screen flex">
 
@@ -26,12 +37,23 @@
       </div>
 
       <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-        <%= link_to "📊 Dashboard",  admin_root_path,           class: "admin-nav-link #{current_page?(admin_root_path) ? 'admin-nav-active' : ''}" %>
-        <%= link_to "👥 Users",      admin_users_path,          class: "admin-nav-link #{controller_name == 'users' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "📚 Books",      admin_books_path,          class: "admin-nav-link #{controller_name == 'books' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🏷 Labels",     admin_labels_path,         class: "admin-nav-link #{controller_name == 'labels' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "📍 Locations",  admin_locations_path,      class: "admin-nav-link #{controller_name == 'locations' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🏅 Badges",     admin_badges_path,         class: "admin-nav-link #{controller_name == 'badges' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "📊 Dashboard",  admin_root_path,      class: "admin-nav-link #{current_page?(admin_root_path) ? 'admin-nav-active' : ''}" %>
+        <%= link_to "👥 Users",      admin_users_path,     class: "admin-nav-link #{controller_name == 'users' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "📚 Books",      admin_books_path,     class: "admin-nav-link #{controller_name == 'books' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "🏷 Labels",     admin_labels_path,    class: "admin-nav-link #{controller_name == 'labels' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "📍 Locations",  admin_locations_path, class: "admin-nav-link #{controller_name == 'locations' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "🏅 Badges",     admin_badges_path,    class: "admin-nav-link #{controller_name == 'badges' ? 'admin-nav-active' : ''}" %>
+
+        <div class="pt-3 mt-3 border-t border-slate-700">
+          <p class="text-slate-600 text-xs font-medium uppercase tracking-wider px-3 mb-2">System</p>
+          <% failed_count = SolidQueue::FailedExecution.count rescue 0 %>
+          <%= link_to admin_jobs_path, class: "admin-nav-link #{controller_name == 'jobs' ? 'admin-nav-active' : ''} flex justify-between" do %>
+            <span>⚙️ Jobs</span>
+            <% if failed_count > 0 %>
+              <span class="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center"><%= failed_count %></span>
+            <% end %>
+          <% end %>
+        </div>
       </nav>
 
       <div class="px-3 py-4 border-t border-slate-700 space-y-1 text-sm">
@@ -43,13 +65,11 @@
 
     <!-- Main content -->
     <div class="ml-56 flex-1 flex flex-col min-h-screen">
-      <!-- Top bar -->
       <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
         <p class="text-slate-500 text-sm">Signed in as <span class="font-medium text-slate-700"><%= current_user.username %></span></p>
         <span class="badge-pill bg-red-100 text-red-700 text-xs">Admin</span>
       </header>
 
-      <!-- Flash -->
       <% if notice.present? %>
         <div class="bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-6 py-2 text-sm">✅ <%= notice %></div>
       <% end %>
@@ -62,5 +82,125 @@
       </main>
     </div>
 
+  <script>
+    // ── Shared AI streaming + markdown rendering ──────────────────────────────
+    const AI_HEADINGS = [
+      'Book Lookup', 'Policy Check', 'Condition Assessment', 'Fraud Signals', 'Recommendation',
+      'Venue Research', 'Chain or Independent\\?', 'Existing Book Programs',
+      'Address Validation', 'Suitability Assessment', 'Concerns'
+    ];
+
+    function fixAiHeadings(text) {
+      let fixed = text;
+      AI_HEADINGS.forEach(h => {
+        fixed = fixed
+          .replace(new RegExp(`([^\\n])(## ${h})`, 'g'), '$1\n\n$2')
+          .replace(new RegExp(`(## ${h})([^\\n])`, 'g'), '$1\n\n$2');
+      });
+      return fixed;
+    }
+
+    const REC_KEYWORDS = ['LOOKS GOOD', 'NEEDS HUMAN ATTENTION', 'LIKELY REJECT', 'LIKELY DECLINE'];
+    const REC_CLASSES  = {
+      'LOOKS GOOD':            'bg-emerald-100 text-emerald-700',
+      'LIKELY REJECT':         'bg-red-100 text-red-700',
+      'LIKELY DECLINE':        'bg-red-100 text-red-700',
+      'NEEDS HUMAN ATTENTION': 'bg-amber-100 text-amber-700',
+    };
+
+    function renderAiMarkdown(text, _type) {
+      const md  = document.getElementById('ai-md-output');
+      const box = document.getElementById('ai-content-area');
+      const emp = document.getElementById('ai-empty-state');
+      const ind = document.getElementById('ai-streaming-indicator');
+      if (!md) return;
+      const fixedText = fixAiHeadings(text);
+      if (typeof marked === 'undefined') {
+        md.textContent = fixedText;
+      } else {
+        md.innerHTML = marked.parse(fixedText);
+      }
+      box.classList.remove('hidden');
+      emp.classList.add('hidden');
+      ind.classList.add('hidden');
+      updateRecPill(text);
+    }
+
+    function updateRecPill(text) {
+      const pill    = document.getElementById('ai-rec-pill');
+      const badge   = document.getElementById('ai-rec-badge');
+      if (!pill || !badge) return;
+      const keyword = REC_KEYWORDS.find(k => text.includes(k));
+      if (keyword) {
+        badge.textContent = keyword;
+        badge.className   = 'badge-pill text-sm px-3 py-1 font-semibold ' + (REC_CLASSES[keyword] || 'bg-slate-100 text-slate-600');
+        pill.classList.remove('hidden');
+      }
+    }
+
+    function startAiStream(url, type) {
+      const btn = document.getElementById('ai-run-btn');
+      const md  = document.getElementById('ai-md-output');
+      const box = document.getElementById('ai-content-area');
+      const emp = document.getElementById('ai-empty-state');
+      const ind = document.getElementById('ai-streaming-indicator');
+      const pill= document.getElementById('ai-rec-pill');
+
+      btn.disabled    = true;
+      btn.textContent = '⏳ Running…';
+      ind.classList.remove('hidden');
+      emp.classList.add('hidden');
+      box.classList.add('hidden');
+      pill.classList.add('hidden');
+      if (md) md.innerHTML = '';
+
+      let accumulated = '';
+      const es = new EventSource(url);
+
+      es.onmessage = function(e) {
+        if (e.data === '[DONE]') {
+          es.close();
+          btn.disabled    = false;
+          btn.textContent = '↻ Re-run';
+          ind.classList.add('hidden');
+          // Final render
+          renderAiMarkdown(accumulated, type);
+          // Update reviewed-at
+          const ts = document.getElementById('ai-reviewed-at');
+          if (ts) {
+            const now = new Date();
+            ts.textContent = 'Reviewed just now';
+          }
+          return;
+        }
+        if (e.data.startsWith('[ERROR]')) {
+          es.close();
+          btn.disabled    = false;
+          btn.textContent = '↻ Re-run';
+          ind.classList.add('hidden');
+          box.classList.remove('hidden');
+          if (md) md.innerHTML = '<p class="text-red-500">' + e.data + '</p>';
+          return;
+        }
+        // Unescape newlines sent from server
+        const chunk = e.data.replace(/\\n/g, '\n');
+        accumulated += chunk;
+        // Re-render markdown as we go
+        if (md) md.innerHTML = (typeof marked !== 'undefined') ? marked.parse(fixAiHeadings(accumulated)) : fixAiHeadings(accumulated);
+        box.classList.remove('hidden');
+        emp.classList.add('hidden');
+        updateRecPill(accumulated);
+        // Scroll to bottom
+        box.scrollTop = box.scrollHeight;
+      };
+
+      es.onerror = function() {
+        es.close();
+        btn.disabled    = false;
+        btn.textContent = '↻ Re-run';
+        ind.classList.add('hidden');
+      };
+    }
+  </script>
   </body>
 </html>

@@ -1,97 +1,45 @@
-<div class="max-w-2xl">
-  <h1 class="page-title">📚 Submit a Book</h1>
-  <p class="page-subtitle">Tell us about the book you'd like to share. Our team will review it before you can print a label and hide it.</p>
-
-  <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-5 py-4 mb-6 text-sm text-indigo-800 flex gap-3">
-    <span class="text-xl">ℹ️</span>
-    <div>
-      <p class="font-semibold mb-0.5">How it works</p>
-      <p class="text-indigo-700">Submit your book → We review it (usually within 24 hrs) → Once approved, you'll be able to print your QR label and hide it at a partner location.</p>
-    </div>
+<%# Step 1: ISBN entry %>
+<div class="max-w-lg mx-auto mt-8">
+  <div class="text-center mb-8">
+    <p class="text-4xl mb-3">📚</p>
+    <h1 class="text-2xl font-bold text-slate-800">Submit a Book</h1>
+    <p class="text-slate-500 mt-1">Start by entering the book's ISBN-13. We'll look it up automatically.</p>
   </div>
 
   <div class="card">
-    <%= form_with model: @book do |f| %>
-      <% if @book.errors.any? %>
-        <div class="error-box">
-          <% @book.errors.full_messages.each do |msg| %><p>• <%= msg %></p><% end %>
-        </div>
+    <%= form_with url: isbn_lookup_books_path, method: :post do |f| %>
+      <% if alert.present? %>
+        <div class="error-box mb-4"><p>⚠️ <%= alert %></p></div>
+      <% end %>
+      <% if flash.now[:alert].present? %>
+        <div class="error-box mb-4"><p>⚠️ <%= flash.now[:alert] %></p></div>
       <% end %>
 
-      <h2 class="text-base font-semibold text-slate-800 mb-4">Book Details</h2>
-
       <div class="form-group">
-        <%= f.label :title, class: "form-label" %>
-        <%= f.text_field :title, required: true, class: "form-input", placeholder: "e.g. The Hitchhiker's Guide to the Galaxy" %>
+        <label class="form-label text-base">ISBN-13</label>
+        <p class="text-slate-400 text-xs mb-2">Found on the back cover barcode — 13 digits, usually starting with 978 or 979.</p>
+        <%= f.text_field :isbn,
+            class: "form-input text-lg font-mono tracking-widest",
+            placeholder: "9780000000000",
+            maxlength: 17,
+            autofocus: true,
+            inputmode: "numeric",
+            value: params[:isbn] %>
       </div>
 
-      <div class="form-group">
-        <%= f.label :author, class: "form-label" %>
-        <%= f.text_field :author, required: true, class: "form-input", placeholder: "e.g. Douglas Adams" %>
+      <div class="flex gap-3 mt-2">
+        <%= f.submit "Look Up Book →", class: "btn-primary flex-1 text-center" %>
+        <%= link_to "Skip →", new_details_books_path, class: "btn-secondary text-center" %>
       </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="form-group">
-          <%= f.label :isbn, "ISBN", class: "form-label" %>
-          <%= f.text_field :isbn, class: "form-input", placeholder: "Optional" %>
-        </div>
-        <div class="form-group">
-          <%= f.label :book_condition, "Condition", class: "form-label" %>
-          <%= f.select :book_condition,
-              [["Like New 🌟", "like_new"], ["Good 👍", "good"], ["Acceptable 👌", "acceptable"], ["Poor 🫤", "poor"]],
-              { prompt: "Select condition" }, { required: true, class: "form-input" } %>
-        </div>
-      </div>
-
-      <div class="border-t border-slate-100 pt-5 mt-2">
-        <h2 class="text-base font-semibold text-slate-800 mb-1">Cover Photos</h2>
-        <p class="text-slate-500 text-sm mb-4">Upload or link photos of the front and back cover so we can verify the book's condition.</p>
-
-        <div class="form-group">
-          <%= f.label :front_cover, "Front Cover Photo URL", class: "form-label" %>
-          <%= f.text_field :front_cover, class: "form-input", placeholder: "https://..." %>
-        </div>
-        <div class="form-group">
-          <%= f.label :back_cover, "Back Cover Photo URL", class: "form-label" %>
-          <%= f.text_field :back_cover, class: "form-input", placeholder: "https://..." %>
-        </div>
-      </div>
-
-      <div class="border-t border-slate-100 pt-5 mt-2">
-        <h2 class="text-base font-semibold text-slate-800 mb-1">Any Notes?</h2>
-        <p class="text-slate-500 text-sm mb-4">Mention anything we should know — strong smells (mildew, perfume), writing inside, water damage, etc.</p>
-        <div class="form-group">
-          <%= f.text_area :submission_notes, rows: 3, class: "form-input",
-              placeholder: "e.g. Slight musty smell on pages, pencil notes in margins on chapter 3, otherwise great condition." %>
-        </div>
-      </div>
-
-      <div class="border-t border-slate-100 pt-5 mt-2">
-        <h2 class="text-base font-semibold text-slate-800 mb-1">Preferred Hide Location</h2>
-        <p class="text-slate-500 text-sm mb-4">Where would you like to leave this book? This is a preference — our team will confirm during review. Only partner locations are available.</p>
-
-        <% if @locations.any? %>
-          <div class="form-group">
-            <%= f.label :preferred_location_id, "Location", class: "form-label" %>
-            <%= f.collection_select :preferred_location_id, @locations, :id, :name,
-                { prompt: "Select a partner location" }, { class: "form-input" } %>
-          </div>
-        <% else %>
-          <div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-amber-700">
-            No partner locations are available yet. You can still submit your book — we'll work out the location during review.
-          </div>
-        <% end %>
-
-        <p class="text-sm text-slate-400 mt-3">
-          Don't see your local library or bookstore?
-          <%= link_to "Nominate a location →", new_location_path, class: "text-indigo-600 hover:underline" %>
-        </p>
-      </div>
-
-      <div class="flex items-center gap-4 mt-6 pt-5 border-t border-slate-100">
-        <%= f.submit "Submit for Review", class: "btn-primary" %>
-        <%= link_to "Cancel", books_path, class: "btn-secondary" %>
-      </div>
+      <p class="text-slate-400 text-xs text-center mt-3">Don't have the ISBN? Click <strong>Skip</strong> to enter the details manually.</p>
     <% end %>
+  </div>
+
+  <div class="text-center mt-6 text-sm text-slate-400">
+    <p>Step <span class="font-bold text-slate-600">1</span> of 2 — Book lookup</p>
+    <div class="flex justify-center gap-2 mt-2">
+      <span class="w-8 h-1.5 rounded-full bg-indigo-500"></span>
+      <span class="w-8 h-1.5 rounded-full bg-slate-200"></span>
+    </div>
   </div>
 </div>

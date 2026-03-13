@@ -1,2 +1,9 @@
-#!/usr/bin/env ruby.exe
-exec "./bin/rails", "server", *ARGV
+#!/usr/bin/env ruby
+require "fileutils"
+
+Dir.chdir File.expand_path("..", __dir__)
+
+system "bundle install"
+system "bun install"
+
+exec "bundle exec foreman start -f Procfile.dev"

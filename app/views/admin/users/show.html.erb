@@ -2,6 +2,16 @@
   <%= link_to "← Users", admin_users_path, class: "text-slate-400 hover:text-slate-600 text-sm" %>
 </div>
 
+<%# Modals %>
+<%= render "shared/modal",
+      id: "modal-delete-user",
+      title: "Delete #{@user.username}?",
+      body: "This will permanently delete the user and all their data including books, finds, and badges. This cannot be undone.",
+      confirm_label: "Delete User",
+      confirm_class: "btn-danger",
+      form_action: admin_user_path(@user),
+      form_method: :delete %>
+
 <div class="grid grid-cols-3 gap-6">
   <div class="col-span-1 space-y-4">
     <div class="card">
@@ -20,9 +30,8 @@
       </div>
       <div class="mt-4 flex gap-2">
         <%= link_to "Edit", edit_admin_user_path(@user), class: "btn-secondary text-sm py-1.5 px-3" %>
-        <%= button_to "Delete", admin_user_path(@user), method: :delete,
-            class: "btn-danger text-sm py-1.5 px-3",
-            data: { confirm: "Delete #{@user.username}? This cannot be undone." } %>
+        <button type="button" onclick="document.getElementById('modal-delete-user').showModal()"
+                class="btn-danger text-sm py-1.5 px-3">Delete</button>
       </div>
     </div>
   </div>

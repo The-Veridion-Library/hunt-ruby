@@ -20,7 +20,7 @@
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
 
-          <!-- Logo + desktop links -->
+          <!-- Logo + desktop primary links -->
           <div class="flex items-center gap-8">
             <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg tracking-tight hover:text-amber-400 transition-colors" do %>
               <span class="text-2xl">📖</span>
@@ -28,38 +28,74 @@
             <% end %>
 
             <div class="hidden md:flex items-center gap-1">
+              <%= link_to "Catalog", books_path, class: "nav-link #{current_page?(books_path) ? 'nav-link-active' : ''}" %>
               <%= link_to "Map", map_path, class: "nav-link #{current_page?(map_path) ? 'nav-link-active' : ''}" %>
-              <%= link_to "Books", books_path, class: "nav-link #{current_page?(books_path) ? 'nav-link-active' : ''}" %>
-              <%= link_to "Labels", labels_path, class: "nav-link #{current_page?(labels_path) ? 'nav-link-active' : ''}" %>
-              <%= link_to "Locations", locations_path, class: "nav-link #{current_page?(locations_path) ? 'nav-link-active' : ''}" %>
-              <%= link_to "My Finds", finds_path, class: "nav-link #{current_page?(finds_path) ? 'nav-link-active' : ''}" %>
               <%= link_to "Leaderboard", leaderboard_path, class: "nav-link #{current_page?(leaderboard_path) ? 'nav-link-active' : ''}" %>
-              <% if user_signed_in? %>
-                <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
-                <%= link_to friendships_path, class: "nav-link #{current_page?(friendships_path) ? 'nav-link-active' : ''} relative" do %>
-                  Friends
-                  <% if pending_count > 0 %>
-                    <span class="absolute -top-1 -right-2 bg-amber-400 text-slate-900 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center"><%= pending_count %></span>
-                  <% end %>
-                <% end %>
-              <% end %>
+              <%= link_to "Locations", locations_path, class: "nav-link #{current_page?(locations_path) ? 'nav-link-active' : ''}" %>
             </div>
           </div>
 
-          <!-- Right: user / auth -->
+          <!-- Right side -->
           <div class="flex items-center gap-3">
-          <% if user_signed_in? && current_user.admin? %>
-            <%= link_to "🛡 Admin", admin_root_path, class: "nav-link bg-red-900 text-red-200 hover:bg-red-800" %>
-          <% end %>
+            <% if user_signed_in? && current_user.admin? %>
+              <%= link_to "🛡 Admin", admin_root_path, class: "nav-link bg-red-900 text-red-200 hover:bg-red-800" %>
+            <% end %>
+
             <% if user_signed_in? %>
-              <%= link_to profile_path(current_user.username), class: "flex items-center gap-2 text-slate-300 hover:text-white transition-colors text-sm font-medium" do %>
-                <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-sm">
-                  <%= (current_user.username || current_user.email).first.upcase %>
+              <%# Pending friend request badge %>
+              <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
+
+              <%# User dropdown %>
+              <div class="relative" id="user-dropdown-wrapper">
+                <button id="user-dropdown-btn"
+                        onclick="toggleUserDropdown()"
+                        class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors text-sm font-medium rounded-md px-2 py-1.5 hover:bg-slate-800"
+                        aria-haspopup="true" aria-expanded="false">
+                  <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-sm flex-shrink-0 relative">
+                    <%= (current_user.username || current_user.email).first.upcase %>
+                    <% if pending_count > 0 %>
+                      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none"><%= pending_count %></span>
+                    <% end %>
+                  </div>
+                  <span class="hidden sm:block"><%= current_user.username || current_user.email %></span>
+                  <svg class="w-3.5 h-3.5 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div id="user-dropdown-menu"
+                     class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50"
+                     role="menu">
+                  <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">My Account</p>
+                  </div>
+                  <%= link_to profile_path(current_user.username), class: "dropdown-item", role: "menuitem" do %>
+                    <span>👤</span> My Profile
+                  <% end %>
+                  <%= link_to books_path(mine: true), class: "dropdown-item", role: "menuitem" do %>
+                    <span>📚</span> My Books
+                  <% end %>
+                  <%= link_to finds_path, class: "dropdown-item", role: "menuitem" do %>
+                    <span>🎯</span> My Finds
+                  <% end %>
+                  <%= link_to labels_path, class: "dropdown-item", role: "menuitem" do %>
+                    <span>🏷</span> My Labels
+                  <% end %>
+                  <%= link_to friendships_path, class: "dropdown-item relative", role: "menuitem" do %>
+                    <span>👥</span> Friends
+                    <% if pending_count > 0 %>
+                      <span class="ml-auto bg-amber-400 text-slate-900 text-xs font-bold rounded-full px-1.5 py-0.5"><%= pending_count %></span>
+                    <% end %>
+                  <% end %>
+                  <div class="border-t border-slate-100 mt-1 pt-1">
+                    <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
+                        class: "dropdown-item text-red-500 hover:bg-red-50 w-full text-left",
+                        role: "menuitem" %>
+                  </div>
                 </div>
-                <span class="hidden sm:block"><%= current_user.username || current_user.email %></span>
-              <% end %>
-              <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
-                  class: "text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 text-sm px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-transparent" %>
+              </div>
+
             <% else %>
               <%= link_to "Sign In", new_user_session_path, class: "text-slate-300 hover:text-white text-sm font-medium transition-colors" %>
               <%= link_to "Sign Up", new_user_registration_path, class: "bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors" %>
@@ -77,15 +113,23 @@
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden border-t border-slate-700 py-3 pb-4">
           <div class="flex flex-col gap-1">
+            <%= link_to "📚 Book Catalog", books_path, class: "mobile-nav-link" %>
             <%= link_to "🗺 Map", map_path, class: "mobile-nav-link" %>
-            <%= link_to "📚 Books", books_path, class: "mobile-nav-link" %>
-            <%= link_to "🏷 Labels", labels_path, class: "mobile-nav-link" %>
-            <%= link_to "📍 Locations", locations_path, class: "mobile-nav-link" %>
-            <%= link_to "🎯 My Finds", finds_path, class: "mobile-nav-link" %>
             <%= link_to "🏆 Leaderboard", leaderboard_path, class: "mobile-nav-link" %>
+            <%= link_to "📍 Locations", locations_path, class: "mobile-nav-link" %>
             <% if user_signed_in? %>
-              <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
-              <%= link_to "👥 Friends#{pending_count > 0 ? " (#{pending_count})" : ""}", friendships_path, class: "mobile-nav-link" %>
+              <div class="border-t border-slate-700 mt-2 pt-2 flex flex-col gap-1">
+                <%= link_to "👤 My Profile", profile_path(current_user.username), class: "mobile-nav-link" %>
+                <%= link_to "📖 My Books", books_path(mine: true), class: "mobile-nav-link" %>
+                <%= link_to "🎯 My Finds", finds_path, class: "mobile-nav-link" %>
+                <%= link_to "🏷 My Labels", labels_path, class: "mobile-nav-link" %>
+                <% pending_count ||= Friendship.where(friend: current_user, status: 'pending').count %>
+                <%= link_to "👥 Friends#{pending_count > 0 ? " (#{pending_count})" : ""}", friendships_path, class: "mobile-nav-link" %>
+                <div class="border-t border-slate-700 mt-2 pt-2">
+                  <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
+                      class: "mobile-nav-link text-red-400 hover:text-red-300 w-full text-left cursor-pointer bg-transparent border-0" %>
+                </div>
+              </div>
             <% end %>
           </div>
         </div>
@@ -110,6 +154,24 @@
     <main class="max-w-7xl mx-auto px-4 pt-24 pb-12">
       <%= yield %>
     </main>
+
+    <script>
+      function toggleUserDropdown() {
+        const menu = document.getElementById('user-dropdown-menu');
+        const btn  = document.getElementById('user-dropdown-btn');
+        const open = !menu.classList.contains('hidden');
+        menu.classList.toggle('hidden', open);
+        btn.setAttribute('aria-expanded', String(!open));
+      }
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('user-dropdown-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+          document.getElementById('user-dropdown-menu')?.classList.add('hidden');
+          document.getElementById('user-dropdown-btn')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+    </script>
 
   </body>
 </html>

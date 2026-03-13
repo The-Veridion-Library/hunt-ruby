@@ -1,6 +1,17 @@
 <div class="flex items-center gap-3 mb-6">
   <%= link_to "← Labels", admin_labels_path, class: "text-slate-400 hover:text-slate-600 text-sm" %>
 </div>
+
+<%# Modal %>
+<%= render "shared/modal",
+      id: "modal-delete-label",
+      title: "Delete this label?",
+      body: "The QR code will stop working and any associated finds will remain. This cannot be undone.",
+      confirm_label: "Delete Label",
+      confirm_class: "btn-danger",
+      form_action: admin_label_path(@label),
+      form_method: :delete %>
+
 <div class="max-w-lg">
   <h1 class="page-title">Label #<%= @label.id %></h1>
   <div class="card mt-4 mb-4">
@@ -13,18 +24,24 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card mb-4">
     <h2 class="text-base font-semibold text-slate-800 mb-4">Override Status</h2>
-    <%= form_with model: [:admin, @label] do |f| %>
+    <%= form_with url: admin_label_path(@label), method: :patch do |f| %>
       <div class="form-group">
-        <%= f.label :status, class: "form-label" %>
-        <%= f.select :status, Label::STATUSES.map { |s| [s.capitalize, s] }, {}, { class: "form-input" } %>
+        <label class="form-label">Status</label>
+        <%= select_tag "label[status]",
+            options_for_select(Label::STATUSES.map { |s| [s.capitalize, s] }, @label.status),
+            class: "form-input" %>
       </div>
-      <div class="flex gap-3 mt-4">
+      <div class="mt-4">
         <%= f.submit "Update Status", class: "btn-primary" %>
-        <%= button_to "Delete Label", admin_label_path(@label), method: :delete,
-            class: "btn-danger", data: { confirm: "Delete this label?" } %>
       </div>
     <% end %>
+  </div>
+
+  <div class="card">
+    <h2 class="text-base font-semibold text-slate-800 mb-3">Danger Zone</h2>
+    <button type="button" onclick="document.getElementById('modal-delete-label').showModal()"
+            class="btn-danger">Delete Label</button>
   </div>
 </div>

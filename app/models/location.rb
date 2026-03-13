@@ -34,6 +34,7 @@ class Location < ApplicationRecord
   def type_emoji = TYPE_EMOJI[location_type] || '📍'
 
   def has_active_labels? = labels.active.any?
+  def ai_reviewed?       = ai_reviewed_at.present?
 
   private
 

@@ -2,8 +2,12 @@ Rails.application.routes.draw do
   devise_for :users
   root "home#index"
 
-  resources :books,       only: [:index, :new, :create, :show] do
-    member { post :report }
+  resources :books, only: [:index, :new, :create, :show] do
+    member     { post :report }
+    collection do
+      post :isbn_lookup
+      get  :new_details
+    end
   end
   resources :locations,   only: [:index, :new, :create]
   resources :labels,      only: [:index, :new, :create, :show, :edit, :update]
@@ -33,14 +37,23 @@ Rails.application.routes.draw do
         patch :reject
         patch :flag
         patch :unflag
+        post  :trigger_ai_review
+        get   :stream_ai_review
       end
     end
     resources :labels,    only: [:index, :show, :update, :destroy]
     resources :locations, only: [:index, :show, :edit, :update, :destroy] do
-      member { patch :set_status }
+      member do
+        patch :set_status
+        post  :trigger_ai_review
+        get   :stream_ai_review
+      end
     end
     resources :badges,    only: [:index, :new, :create, :edit, :update, :destroy] do
       resources :user_badges, only: [:create, :destroy]
+    end
+    resources :jobs, only: [:index] do
+      collection { delete :clear_failed }
     end
   end
 end

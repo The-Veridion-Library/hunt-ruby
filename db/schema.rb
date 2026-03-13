@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_11_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,6 +26,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
   end
 
   create_table "books", force: :cascade do |t|
+    t.text "ai_review"
+    t.datetime "ai_reviewed_at"
     t.string "author"
     t.string "back_cover"
     t.string "book_condition"
@@ -34,6 +36,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
     t.boolean "flagged"
     t.string "front_cover"
     t.string "isbn"
+    t.string "maturity_rating"
     t.integer "preferred_location_id"
     t.text "rejection_reason"
     t.string "status"
@@ -84,6 +87,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
   create_table "locations", force: :cascade do |t|
     t.string "address_line_1"
     t.string "address_line_2"
+    t.text "ai_review"
+    t.datetime "ai_reviewed_at"
     t.string "city"
     t.string "contact_name"
     t.datetime "created_at", null: false
@@ -120,6 +125,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.integer "points"
+    t.string "public_id"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
@@ -127,6 +133,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_023730) do
     t.datetime "updated_at", null: false
     t.string "username"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["public_id"], name: "index_users_on_public_id", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

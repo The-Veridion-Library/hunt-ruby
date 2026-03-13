@@ -1,0 +1,39 @@
+<%# app/views/shared/_modal.html.erb — reusable <dialog> modal, centered vertically + horizontally
+  Required locals: id, title, confirm_label, form_action, form_method
+  Optional locals: body, confirm_class, textarea_name, textarea_label, textarea_placeholder, textarea_required, hidden_params (hash)
+%>
+<dialog id="<%= id %>"
+        class="fixed inset-0 m-auto rounded-2xl shadow-2xl border border-slate-200 p-0 w-full max-w-2xl backdrop:bg-black/50 text-center"
+        onclick="if(event.target===this)this.close()">
+  <div class="p-6">
+    <h2 class="text-xl font-semibold text-slate-900 mb-2"><%= title %></h2>
+    <% if local_assigns[:body].present? %>
+      <p class="text-slate-500 text-base mb-6"><%= body %></p>
+    <% end %>
+
+    <%= form_with url: form_action, method: form_method do |f| %>
+      <% if local_assigns[:textarea_name].present? %>
+        <div class="mb-6 text-left">
+          <label class="form-label">
+            <%= local_assigns[:textarea_label] || textarea_name.to_s.humanize %>
+            <% if local_assigns[:textarea_required] %><span class="text-red-500 ml-0.5">*</span><% end %>
+          </label>
+          <%= f.text_area textarea_name, rows: 3, class: "form-input",
+              required: local_assigns[:textarea_required] || false,
+              placeholder: local_assigns[:textarea_placeholder] || "" %>
+        </div>
+      <% end %>
+      <% if local_assigns[:hidden_params].present? %>
+        <% hidden_params.each do |name, value| %>
+          <%= hidden_field_tag name, value %>
+        <% end %>
+      <% end %>
+      <div class="flex gap-3 justify-center mt-6">
+        <button type="button" onclick="document.getElementById('<%= id %>').close()"
+                class="btn-secondary text-sm py-2 px-6">Cancel</button>
+        <%= f.submit confirm_label,
+            class: "#{local_assigns[:confirm_class].presence || 'btn-primary'} text-sm py-2 px-6 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</dialog>
