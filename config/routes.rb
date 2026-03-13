@@ -55,5 +55,6 @@ Rails.application.routes.draw do
     resources :jobs, only: [:index] do
       collection { delete :clear_failed }
     end
+    resources :audit_logs, only: [:index]
   end
 end

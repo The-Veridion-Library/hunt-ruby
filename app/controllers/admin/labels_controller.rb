@@ -9,7 +9,19 @@ class Admin::LabelsController < Admin::BaseController
   def show; end
 
   def update
+    previous_status = @label.status
+
     if @label.update(label_params)
+      if previous_status != @label.status && @label.status == 'invalidated'
+        AuditLogService.log(
+          user: current_user,
+          action: 'force_invalidated_label',
+          resource: @label,
+          details: { from: previous_status, to: @label.status },
+          request: request
+        )
+      end
+
       redirect_to admin_label_path(@label), notice: "Label status updated."
     else
       render :show, status: :unprocessable_entity
@@ -18,6 +30,14 @@ class Admin::LabelsController < Admin::BaseController
 
   def destroy
     @label.destroy
+
+    AuditLogService.log(
+      user: current_user,
+      action: 'deleted_label',
+      resource: @label,
+      request: request
+    )
+
     redirect_to admin_labels_path, notice: "Label deleted."
   end
 

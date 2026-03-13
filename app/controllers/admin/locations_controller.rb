@@ -27,6 +27,15 @@ class Admin::LocationsController < Admin::BaseController
       redirect_to admin_location_path(@location), alert: "Cannot delete — this location has active labels."
     else
       @location.destroy
+
+      AuditLogService.log(
+        user: current_user,
+        action: 'deleted_location',
+        resource: @location,
+        details: { name: @location.name },
+        request: request
+      )
+
       redirect_to admin_locations_path, notice: "Location deleted."
     end
   end
@@ -76,6 +85,17 @@ class Admin::LocationsController < Admin::BaseController
     end
 
     @location.update!(nomination_status: new_status)
+
+    if new_status == 'partner'
+      AuditLogService.log(
+        user: current_user,
+        action: 'verified_location',
+        resource: @location,
+        details: { from: @location.nomination_status_before_last_save, to: new_status },
+        request: request
+      )
+    end
+
     notice = case new_status
              when 'partner'      then "✅ #{@location.name} is now a partner location!"
              when 'under_review' then "Marked as under review."

@@ -1,0 +1,84 @@
+<h1 class="page-title mb-6">Audit Logs</h1>
+
+<div class="card mb-6">
+  <%= form_with url: admin_audit_logs_path, method: :get, local: true, class: "grid grid-cols-1 md:grid-cols-4 gap-4" do %>
+    <div class="form-group mb-0">
+      <label class="form-label">Action</label>
+      <%= select_tag :action_type,
+          options_for_select([["All actions", ""]] + @action_types.map { |a| [a.humanize, a] }, params[:action_type]),
+          class: "form-input" %>
+    </div>
+
+    <div class="form-group mb-0">
+      <label class="form-label">Admin User</label>
+      <%= select_tag :admin_user_id,
+          options_for_select([["All admins", ""]] + @admin_users.map { |u| [u.username, u.id] }, params[:admin_user_id]),
+          class: "form-input" %>
+    </div>
+
+    <div class="form-group mb-0">
+      <label class="form-label">From Date</label>
+      <%= date_field_tag :from_date, params[:from_date], class: "form-input" %>
+    </div>
+
+    <div class="form-group mb-0">
+      <label class="form-label">To Date</label>
+      <%= date_field_tag :to_date, params[:to_date], class: "form-input" %>
+    </div>
+
+    <div class="md:col-span-4 flex gap-3">
+      <%= submit_tag "Filter", class: "btn-primary" %>
+      <%= link_to "Reset", admin_audit_logs_path, class: "btn-secondary" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+      <tr>
+        <th class="text-left px-4 py-3 font-medium">Timestamp</th>
+        <th class="text-left px-4 py-3 font-medium">Admin</th>
+        <th class="text-left px-4 py-3 font-medium">Action</th>
+        <th class="text-left px-4 py-3 font-medium">Resource</th>
+        <th class="text-left px-4 py-3 font-medium">IP Address</th>
+        <th class="text-left px-4 py-3 font-medium">Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @audit_logs.each do |log| %>
+        <% resource_label, resource_path = resource_link_data(log) %>
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
+          <td class="px-4 py-3 whitespace-nowrap"><%= log.created_at.strftime("%b %d, %Y %I:%M %p") %></td>
+          <td class="px-4 py-3 whitespace-nowrap"><%= log.user&.username || "Unknown" %></td>
+          <td class="px-4 py-3"><span class="badge-pill bg-slate-100 text-slate-700"><%= log.action.humanize %></span></td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <% if resource_path.present? %>
+              <%= link_to resource_label, resource_path, class: "text-indigo-600 hover:underline" %>
+            <% else %>
+              <%= resource_label %>
+            <% end %>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap"><%= log.ip_address.presence || "—" %></td>
+          <td class="px-4 py-3"><%= log.details.present? ? log.details.to_json : "{}" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @audit_logs.empty? %>
+    <p class="px-4 py-6 text-slate-500 text-sm">No audit log entries match this filter.</p>
+  <% end %>
+</div>
+
+<div class="flex items-center justify-between mt-4">
+  <p class="text-sm text-slate-500">Showing <%= @audit_logs.length %> of <%= @total_count %> entries</p>
+  <div class="flex gap-2">
+    <% if @has_previous %>
+      <%= link_to "← Previous", url_for(request.query_parameters.merge(page: @page - 1)), class: "btn-secondary" %>
+    <% end %>
+    <% if @has_next %>
+      <%= link_to "Next →", url_for(request.query_parameters.merge(page: @page + 1)), class: "btn-secondary" %>
+    <% end %>
+  </div>
+</div>

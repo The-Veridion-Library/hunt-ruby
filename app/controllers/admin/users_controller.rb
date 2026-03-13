@@ -15,7 +15,19 @@ class Admin::UsersController < Admin::BaseController
   def edit; end
 
   def update
+    previous_role = @user.role
+
     if @user.update(user_params)
+      if previous_role != @user.role
+        AuditLogService.log(
+          user: current_user,
+          action: 'role_changed',
+          resource: @user,
+          details: { from: previous_role, to: @user.role },
+          request: request
+        )
+      end
+
       redirect_to admin_user_path(@user), notice: "User updated."
     else
       render :edit, status: :unprocessable_entity
@@ -24,6 +36,15 @@ class Admin::UsersController < Admin::BaseController
 
   def destroy
     @user.destroy
+
+    AuditLogService.log(
+      user: current_user,
+      action: 'deleted_user',
+      resource: @user,
+      details: { username: @user.username, email: @user.email },
+      request: request
+    )
+
     redirect_to admin_users_path, notice: "User deleted."
   end
 

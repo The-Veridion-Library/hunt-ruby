@@ -27,6 +27,15 @@ class Admin::BooksController < Admin::BaseController
 
   def destroy
     @book.destroy
+
+    AuditLogService.log(
+      user: current_user,
+      action: 'deleted_book',
+      resource: @book,
+      details: { title: @book.title },
+      request: request
+    )
+
     redirect_to admin_books_path, notice: "Book deleted."
   end
 
@@ -46,11 +55,27 @@ class Admin::BooksController < Admin::BaseController
 
   def flag
     @book.update!(flagged: true)
+
+    AuditLogService.log(
+      user: current_user,
+      action: 'flagged_book',
+      resource: @book,
+      request: request
+    )
+
     redirect_back fallback_location: admin_books_path, notice: "Book flagged for review."
   end
 
   def unflag
     @book.update!(flagged: false)
+
+    AuditLogService.log(
+      user: current_user,
+      action: 'unflagged_book',
+      resource: @book,
+      request: request
+    )
+
     redirect_back fallback_location: admin_books_path, notice: "Flag cleared."
   end
 

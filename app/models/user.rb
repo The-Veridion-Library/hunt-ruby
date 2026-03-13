@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :badges, through: :user_badges
   has_many :friendships, dependent: :destroy
   has_many :friends, through: :friendships
+  has_many :audit_logs, dependent: :nullify
 
   validates :username, presence: true, uniqueness: true, length: { minimum: 3, maximum: 30 }
   validates :points, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true

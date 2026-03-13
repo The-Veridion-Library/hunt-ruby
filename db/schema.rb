@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_11_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "ip_address"
+    t.bigint "resource_id", null: false
+    t.string "resource_type", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["action"], name: "index_audit_logs_on_action"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
+    t.index ["resource_type", "resource_id"], name: "index_audit_logs_on_resource_type_and_resource_id"
+    t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
 
   create_table "badges", force: :cascade do |t|
     t.string "badge_type"
@@ -137,6 +152,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_000002) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "audit_logs", "users", on_delete: :nullify
   add_foreign_key "books", "users"
   add_foreign_key "finds", "books"
   add_foreign_key "finds", "labels"
