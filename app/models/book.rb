@@ -4,6 +4,8 @@ class Book < ApplicationRecord
   has_many :labels, dependent: :destroy
   has_many :locations, through: :labels
   has_many :finds, dependent: :destroy
+  has_many :hunt_books, dependent: :destroy
+  has_many :hunts, through: :hunt_books
 
   SUBMISSION_STATUSES = %w[pending_review approved rejected].freeze
   CONDITIONS          = %w[like_new good acceptable poor].freeze

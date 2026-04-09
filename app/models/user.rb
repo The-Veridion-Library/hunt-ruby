@@ -13,6 +13,9 @@ class User < ApplicationRecord
   has_many :friendships, dependent: :destroy
   has_many :friends, through: :friendships
   has_many :audit_logs, dependent: :nullify
+  has_many :hunts, dependent: :destroy
+  has_many :hunt_participants, dependent: :destroy
+  has_many :joined_hunts, through: :hunt_participants, source: :hunt
 
   validates :username, presence: true, uniqueness: true, length: { minimum: 3, maximum: 30 }
   validates :points, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true

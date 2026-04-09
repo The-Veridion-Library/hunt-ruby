@@ -40,6 +40,7 @@
         <%= link_to "📊 Dashboard",  admin_root_path,      class: "admin-nav-link #{current_page?(admin_root_path) ? 'admin-nav-active' : ''}" %>
         <%= link_to "👥 Users",      admin_users_path,     class: "admin-nav-link #{controller_name == 'users' ? 'admin-nav-active' : ''}" %>
         <%= link_to "📚 Books",      admin_books_path,     class: "admin-nav-link #{controller_name == 'books' ? 'admin-nav-active' : ''}" %>
+        <%= link_to "🧭 Hunts",      admin_hunts_path,     class: "admin-nav-link #{controller_name == 'hunts' ? 'admin-nav-active' : ''}" %>
         <%= link_to "🏷 Labels",     admin_labels_path,    class: "admin-nav-link #{controller_name == 'labels' ? 'admin-nav-active' : ''}" %>
         <%= link_to "📍 Locations",  admin_locations_path, class: "admin-nav-link #{controller_name == 'locations' ? 'admin-nav-active' : ''}" %>
         <%= link_to "🏅 Badges",     admin_badges_path,    class: "admin-nav-link #{controller_name == 'badges' ? 'admin-nav-active' : ''}" %>

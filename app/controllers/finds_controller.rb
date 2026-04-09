@@ -50,6 +50,15 @@ class FindsController < ApplicationController
       BadgeAwarder.call(current_user)
       @book.update!(status: 'found')
       @label.update!(status: 'invalidated')
+
+      Hunt.joins(:hunt_books).where(hunt_books: { book_id: @book.id }).distinct.find_each do |hunt|
+        hunt.refresh_status!
+        next unless hunt.active?
+
+        participant = hunt.hunt_participants.find_by(user: current_user)
+        participant&.recalculate_score!
+      end
+
       redirect_to finds_path, notice: "🎉 Book found! +10 points added to your profile."
     else
       @label = @find.label

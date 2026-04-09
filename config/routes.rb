@@ -14,6 +14,9 @@ Rails.application.routes.draw do
   resources :locations,   only: [:index, :new, :create]
   resources :labels,      only: [:index, :new, :create, :show, :edit, :update]
   resources :finds,       only: [:index, :new, :create]
+  resources :hunts,       only: [:index, :show, :new, :create] do
+    resources :hunt_participants, only: [:create]
+  end
   resources :profiles,    only: [:show], param: :username
   resources :friendships, only: [:create, :destroy, :index]
 
@@ -49,6 +52,13 @@ Rails.application.routes.draw do
         patch :set_status
         post  :trigger_ai_review
         get   :stream_ai_review
+      end
+    end
+    resources :hunts, only: [:index, :show, :destroy] do
+      member do
+        patch :set_status
+        post :recalculate_scores
+        post :award_winner_badge
       end
     end
     resources :badges,    only: [:index, :new, :create, :edit, :update, :destroy] do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -86,6 +86,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_160000) do
     t.index ["user_id"], name: "index_friendships_on_user_id"
   end
 
+  create_table "hunt_books", force: :cascade do |t|
+    t.bigint "book_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "hunt_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_hunt_books_on_book_id"
+    t.index ["hunt_id", "book_id"], name: "index_hunt_books_on_hunt_id_and_book_id", unique: true
+    t.index ["hunt_id"], name: "index_hunt_books_on_hunt_id"
+  end
+
+  create_table "hunt_participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "hunt_id", null: false
+    t.integer "score", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["hunt_id", "user_id"], name: "index_hunt_participants_on_hunt_id_and_user_id", unique: true
+    t.index ["hunt_id"], name: "index_hunt_participants_on_hunt_id"
+    t.index ["user_id"], name: "index_hunt_participants_on_user_id"
+  end
+
+  create_table "hunts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "end_date", null: false
+    t.datetime "start_date", null: false
+    t.string "status", default: "upcoming", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.datetime "winner_badge_awarded_at"
+    t.index ["end_date"], name: "index_hunts_on_end_date"
+    t.index ["start_date"], name: "index_hunts_on_start_date"
+    t.index ["status"], name: "index_hunts_on_status"
+    t.index ["user_id"], name: "index_hunts_on_user_id"
+  end
+
   create_table "labels", force: :cascade do |t|
     t.bigint "book_id", null: false
     t.datetime "created_at", null: false
@@ -158,6 +195,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_160000) do
   add_foreign_key "finds", "labels"
   add_foreign_key "finds", "users"
   add_foreign_key "friendships", "users"
+  add_foreign_key "hunt_books", "books"
+  add_foreign_key "hunt_books", "hunts"
+  add_foreign_key "hunt_participants", "hunts"
+  add_foreign_key "hunt_participants", "users"
+  add_foreign_key "hunts", "users"
   add_foreign_key "labels", "books"
   add_foreign_key "labels", "locations"
   add_foreign_key "labels", "users"

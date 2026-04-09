@@ -1,0 +1,103 @@
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="page-title">🧭 Hunts</h1>
+    <p class="page-subtitle">Time-limited events with dedicated books, map views, and leaderboards</p>
+  </div>
+  <%= link_to "Create a Hunt", new_hunt_path, class: "btn-primary" %>
+</div>
+
+<% if @active_hunts.any? %>
+  <div class="mb-8">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">🔥 Active Now</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <% @active_hunts.each do |hunt| %>
+        <div class="card hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="font-semibold text-slate-900 text-lg"><%= hunt.title %></h3>
+              <p class="text-slate-500 text-sm mt-1"><%= hunt.description.to_s.truncate(140) %></p>
+            </div>
+            <span class="badge-pill bg-emerald-100 text-emerald-700">🟢 Active</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-sm">
+            <div>
+              <p class="text-slate-400">Books</p>
+              <p class="font-semibold text-slate-700"><%= hunt.books.count %></p>
+            </div>
+            <div>
+              <p class="text-slate-400">Hunters</p>
+              <p class="font-semibold text-slate-700"><%= hunt.hunt_participants.count %></p>
+            </div>
+            <div>
+              <p class="text-slate-400">Ends</p>
+              <p class="font-semibold text-slate-700"><%= hunt.end_date.strftime("%b %d, %I:%M %p") %></p>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <%= link_to "Open Hunt →", hunt_path(hunt), class: "text-indigo-600 hover:underline text-sm font-medium" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  <div>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">🗓 Upcoming</h2>
+    <% if @upcoming_hunts.any? %>
+      <div class="space-y-3">
+        <% @upcoming_hunts.each do |hunt| %>
+          <div class="card">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-slate-900"><%= hunt.title %></h3>
+                <p class="text-slate-500 text-sm mt-0.5"><%= hunt.start_date.strftime("Starts %b %d at %I:%M %p") %></p>
+              </div>
+              <span class="badge-pill bg-blue-100 text-blue-700">⏳ Upcoming</span>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-sm text-slate-500">
+              <span><%= pluralize(hunt.books.count, 'book') %></span>
+              <%= link_to "Preview", hunt_path(hunt), class: "text-indigo-600 hover:underline font-medium" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="card text-center py-10">
+        <p class="text-4xl mb-2">📆</p>
+        <p class="text-slate-500">No upcoming hunts yet.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">🏁 Recently Ended</h2>
+    <% if @ended_hunts.any? %>
+      <div class="space-y-3">
+        <% @ended_hunts.each do |hunt| %>
+          <div class="card">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-slate-900"><%= hunt.title %></h3>
+                <p class="text-slate-500 text-sm mt-0.5">Ended <%= time_ago_in_words(hunt.end_date) %> ago</p>
+              </div>
+              <span class="badge-pill bg-slate-100 text-slate-600">⚑ Ended</span>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-sm text-slate-500">
+              <span><%= pluralize(hunt.hunt_participants.count, 'participant') %></span>
+              <%= link_to "View Results", hunt_path(hunt), class: "text-indigo-600 hover:underline font-medium" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="card text-center py-10">
+        <p class="text-4xl mb-2">🏁</p>
+        <p class="text-slate-500">No completed hunts yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

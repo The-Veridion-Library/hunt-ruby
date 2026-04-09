@@ -29,6 +29,7 @@
 
             <div class="hidden md:flex items-center gap-1">
               <%= link_to "Catalog", books_path, class: "nav-link #{current_page?(books_path) ? 'nav-link-active' : ''}" %>
+              <%= link_to "Hunts", hunts_path, class: "nav-link #{controller_name == 'hunts' ? 'nav-link-active' : ''}" %>
               <%= link_to "Map", map_path, class: "nav-link #{current_page?(map_path) ? 'nav-link-active' : ''}" %>
               <%= link_to "Leaderboard", leaderboard_path, class: "nav-link #{current_page?(leaderboard_path) ? 'nav-link-active' : ''}" %>
               <%= link_to "Locations", locations_path, class: "nav-link #{current_page?(locations_path) ? 'nav-link-active' : ''}" %>
@@ -114,6 +115,7 @@
         <div id="mobile-menu" class="hidden md:hidden border-t border-slate-700 py-3 pb-4">
           <div class="flex flex-col gap-1">
             <%= link_to "📚 Book Catalog", books_path, class: "mobile-nav-link" %>
+            <%= link_to "🧭 Hunts", hunts_path, class: "mobile-nav-link" %>
             <%= link_to "🗺 Map", map_path, class: "mobile-nav-link" %>
             <%= link_to "🏆 Leaderboard", leaderboard_path, class: "mobile-nav-link" %>
             <%= link_to "📍 Locations", locations_path, class: "mobile-nav-link" %>
