@@ -3,6 +3,8 @@ source "https://rubygems.org"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.2"
 
+gem "fiddle"
+
 gem "dotenv-rails", groups: [:development, :test]
 
 gem "devise"
