@@ -1,24 +1,69 @@
-# README
+# TVBH Development Setup
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This project supports a Docker-first local workflow where Postgres runs in Docker,
+and you can run the Rails app + Vite + jobs from a `web` container.
 
-Things you may want to cover:
+## 1. Clone and enter the project
 
-* Ruby version
+```bash
+git clone <your-repo-url>
+cd tvbh
+```
 
-* System dependencies
+## 2. Create your environment file
 
-* Configuration
+```bash
+cp .env.example .env
+```
 
-* Database creation
+Edit `.env` if needed. The defaults are already wired for Docker Compose.
 
-* Database initialization
+## 3. Build and start containers
 
-* How to run the test suite
+```bash
+docker compose up --build -d
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+## 4. Prepare the database
 
-* Deployment instructions
+```bash
+docker compose run --rm web bin/rails db:prepare
+```
 
-* ...
+## 5. Run Vite SSR build once
+
+```bash
+docker compose run --rm web bin/vite build --ssr
+```
+
+## 6. Start the app stack
+
+```bash
+docker compose exec web bin/dev
+```
+
+`bin/dev` starts:
+- Rails web server on `http://localhost:3000`
+- Vite dev server on `http://localhost:3036`
+- Jobs worker
+
+## Common commands
+
+```bash
+docker compose exec web bin/rails c
+docker compose exec web bin/rails db:migrate
+docker compose exec web bin/rails test
+docker compose exec web bin/rails db:seed
+```
+
+## Stop everything
+
+```bash
+docker compose down
+```
+
+To also remove database data volume:
+
+```bash
+docker compose down -v
+```
