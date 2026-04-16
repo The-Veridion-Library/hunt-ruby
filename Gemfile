@@ -45,6 +45,8 @@ gem "image_processing", "~> 1.2"
 
 gem "vite_rails"
 
+gem "blazer"
+
 gem "rqrcode"
 
 group :development, :test do

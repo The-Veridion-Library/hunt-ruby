@@ -6,6 +6,8 @@ Rails.application.routes.draw do
     mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
+  mount Blazer::Engine, at: "blazer"
+
   root "home#index"
 
   resources :books, only: [:index, :new, :create, :show] do
