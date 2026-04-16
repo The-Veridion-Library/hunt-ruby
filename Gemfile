@@ -5,6 +5,8 @@ gem "rails", "~> 8.1.2"
 
 gem "fiddle"
 
+gem "mission_control-jobs"
+
 gem "dotenv-rails", groups: [:development, :test]
 
 gem "devise"

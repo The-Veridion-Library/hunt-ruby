@@ -1,5 +1,11 @@
 Rails.application.routes.draw do
+
   devise_for :users
+
+  authenticate :user, lambda { |user| user.admin? } do
+    mount MissionControl::Jobs::Engine, at: "/jobs"
+  end
+
   root "home#index"
 
   resources :books, only: [:index, :new, :create, :show] do
@@ -63,9 +69,6 @@ Rails.application.routes.draw do
     end
     resources :badges,    only: [:index, :new, :create, :edit, :update, :destroy] do
       resources :user_badges, only: [:create, :destroy]
-    end
-    resources :jobs, only: [:index] do
-      collection { delete :clear_failed }
     end
     resources :audit_logs, only: [:index]
   end
