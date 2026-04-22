@@ -7,223 +7,242 @@
     <meta name="csrf-token" content="<%= form_authenticity_token %>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application', defer: true %>
     <%= vite_stylesheet_tag 'application', media: 'all' %>
     <style>
-      body { font-family: 'Inter', sans-serif; }
+      * { font-family: 'Figtree', sans-serif; }
+      body { background-color: #faf7f2; color: #2d2520; }
+
       /* AI markdown prose styles */
-      .prose-ai h2 { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+      .prose-ai h2 { font-size: 0.9rem; font-weight: 700; color: #2d2520; margin: 1rem 0 0.4rem; border-bottom: 1px solid #e8e0d0; padding-bottom: 0.25rem; }
       .prose-ai p  { margin: 0.35rem 0; line-height: 1.6; }
       .prose-ai ul { list-style: disc; padding-left: 1.25rem; margin: 0.35rem 0; }
       .prose-ai li { margin: 0.2rem 0; }
-      .prose-ai strong { font-weight: 600; color: #334155; }
-      .prose-ai code { background: #f1f5f9; border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
+      .prose-ai strong { font-weight: 600; color: #4a3828; }
+      .prose-ai code { background: #f0e8da; border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
     </style>
-    <!-- marked.js for markdown rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   </head>
-  <body class="bg-slate-100 min-h-screen flex">
 
-    <!-- Sidebar -->
-    <aside class="w-56 bg-slate-900 min-h-screen flex flex-col fixed top-0 left-0 z-40">
-      <div class="px-4 py-5 border-b border-slate-700">
-        <%= link_to admin_root_path, class: "flex items-center gap-2 text-white font-bold" do %>
-          <span class="text-xl">🛡️</span>
-          <span>TVBH Admin</span>
-        <% end %>
-        <p class="text-slate-500 text-xs mt-1"><%= current_user.email %></p>
-      </div>
+  <%#
+    Layout concept: the full viewport has the warm bg.
+    A thin border ring wraps everything. The sidebar sits
+    on the left inside that ring. The content area is a
+    rounded "window" inset from the sidebar, giving the
+    feeling of a panel floating inside the frame.
+  %>
+  <body class="min-h-screen" style="background:#faf7f2;">
 
-      <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-        <%= link_to "📊 Dashboard",  admin_root_path,      class: "admin-nav-link #{current_page?(admin_root_path) ? 'admin-nav-active' : ''}" %>
-        <%= link_to "👥 Users",      admin_users_path,     class: "admin-nav-link #{controller_name == 'users' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "📚 Books",      admin_books_path,     class: "admin-nav-link #{controller_name == 'books' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🧭 Hunts",      admin_hunts_path,     class: "admin-nav-link #{controller_name == 'hunts' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🏷 Labels",     admin_labels_path,    class: "admin-nav-link #{controller_name == 'labels' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "📍 Locations",  admin_locations_path, class: "admin-nav-link #{controller_name == 'locations' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🏅 Badges",     admin_badges_path,    class: "admin-nav-link #{controller_name == 'badges' ? 'admin-nav-active' : ''}" %>
-        <%= link_to "🧾 Audit Logs", admin_audit_logs_path, class: "admin-nav-link #{controller_name == 'audit_logs' ? 'admin-nav-active' : ''}" %>
+    <%# Full-screen border frame — fixed, behind everything %>
+    <div class="fixed inset-3 rounded-2xl border border-[#d4c8b4] pointer-events-none z-50" style="box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);"></div>
 
-        <div class="pt-3 mt-3 border-t border-slate-700">
-          <p class="text-slate-600 text-xs font-medium uppercase tracking-wider px-3 mb-2">System</p>
+    <div class="flex min-h-screen">
+
+      <%# ── Sidebar ── %>
+      <aside class="w-56 min-h-screen flex flex-col fixed top-0 left-0 z-40" style="padding: 12px 0 12px 12px;">
+        <div class="flex flex-col flex-1 rounded-xl overflow-hidden" style="background: #fffdf9; border: 1px solid #e8e0d0; box-shadow: 2px 0 12px rgba(0,0,0,0.04);">
+
+          <%# Logo %>
+          <div class="px-4 py-5" style="border-bottom: 1px solid #e8e0d0;">
+            <%= link_to admin_root_path, class: "flex items-center gap-2 font-bold text-base", style: "color:#2d2520;" do %>
+              <span class="text-xl">🛡️</span>
+              <span>TVBH Admin</span>
+            <% end %>
+            <p class="text-xs mt-1 truncate" style="color:#a8927c;"><%= current_user.email %></p>
+          </div>
+
+          <%# Nav %>
+          <nav class="flex-1 px-2 py-4 space-y-0.5 text-sm overflow-y-auto">
+            <p class="text-xs font-semibold uppercase tracking-wider px-3 mb-2" style="color:#c4a882;">Overview</p>
+            <%= link_to admin_root_path, class: "admin-nav-link #{current_page?(admin_root_path) ? 'admin-nav-active' : ''}" do %>
+              <span>📊</span> Dashboard
+            <% end %>
+
+            <p class="text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2" style="color:#c4a882;">Content</p>
+            <%= link_to admin_users_path,     class: "admin-nav-link #{controller_name == 'users'      ? 'admin-nav-active' : ''}" do %><span>👥</span> Users<% end %>
+            <%= link_to admin_books_path,     class: "admin-nav-link #{controller_name == 'books'      ? 'admin-nav-active' : ''}" do %><span>📚</span> Books<% end %>
+            <%= link_to admin_hunts_path,     class: "admin-nav-link #{controller_name == 'hunts'      ? 'admin-nav-active' : ''}" do %><span>🧭</span> Hunts<% end %>
+            <%= link_to admin_labels_path,    class: "admin-nav-link #{controller_name == 'labels'     ? 'admin-nav-active' : ''}" do %><span>🏷</span> Labels<% end %>
+            <%= link_to admin_locations_path, class: "admin-nav-link #{controller_name == 'locations'  ? 'admin-nav-active' : ''}" do %><span>📍</span> Locations<% end %>
+            <%= link_to admin_badges_path,    class: "admin-nav-link #{controller_name == 'badges'     ? 'admin-nav-active' : ''}" do %><span>🏅</span> Badges<% end %>
+
+            <p class="text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2" style="color:#c4a882;">System</p>
+            <%= link_to admin_audit_logs_path, class: "admin-nav-link #{controller_name == 'audit_logs' ? 'admin-nav-active' : ''}" do %><span>🧾</span> Audit Logs<% end %>
+          </nav>
+
+          <%# Footer %>
+          <div class="px-2 py-3 space-y-0.5 text-sm" style="border-top: 1px solid #e8e0d0;">
+            <%= link_to root_path, class: "admin-nav-link" do %><span>←</span> Back to App<% end %>
+            <%= button_to destroy_user_session_path, method: :delete,
+                class: "w-full text-left admin-nav-link bg-transparent border-0 cursor-pointer" do %>
+              <span>🚪</span> Sign Out
+            <% end %>
+          </div>
+
         </div>
-      </nav>
+      </aside>
 
-      <div class="px-3 py-4 border-t border-slate-700 space-y-1 text-sm">
-        <%= link_to "← Back to App", root_path, class: "admin-nav-link" %>
-        <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
-            class: "w-full text-left admin-nav-link bg-transparent border-0 cursor-pointer" %>
+      <%# ── Main content area ── %>
+      <div class="ml-56 flex-1 flex flex-col min-h-screen" style="padding: 12px 12px 12px 8px;">
+
+        <%# The "window" — rounded content frame %>
+        <div class="flex-1 flex flex-col rounded-xl overflow-hidden" style="background: #fffdf9; border: 1px solid #e8e0d0; box-shadow: 0 2px 16px rgba(0,0,0,0.05);">
+
+          <%# Top bar %>
+          <header class="flex items-center justify-between px-6 py-3 flex-shrink-0" style="border-bottom: 1px solid #e8e0d0; background: #fffdf9;">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold" style="color:#4a3828;">Admin Panel</span>
+              <span class="text-[#c4a882] text-sm">/</span>
+              <span class="text-sm" style="color:#8a7a6a;"><%= current_user.username %></span>
+            </div>
+            <span class="badge-pill text-xs font-semibold px-2.5 py-1" style="background:#fef3c7; color:#92400e; border: 1px solid #fde68a;">🛡 Admin</span>
+          </header>
+
+          <%# Flash messages %>
+          <% if notice.present? %>
+            <div class="px-6 py-2.5 text-sm font-medium flex items-center gap-2" style="background:#f0fdf4; border-bottom: 1px solid #bbf7d0; color:#14532d;">
+              ✅ <%= notice %>
+            </div>
+          <% end %>
+          <% if alert.present? %>
+            <div class="px-6 py-2.5 text-sm font-medium flex items-center gap-2" style="background:#fff7ed; border-bottom: 1px solid #fed7aa; color:#7c2d12;">
+              ⚠️ <%= alert %>
+            </div>
+          <% end %>
+
+          <%# Page content %>
+          <main class="flex-1 p-6 overflow-auto">
+            <%= yield %>
+          </main>
+
+        </div>
       </div>
-    </aside>
 
-    <!-- Main content -->
-    <div class="ml-56 flex-1 flex flex-col min-h-screen">
-      <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-        <p class="text-slate-500 text-sm">Signed in as <span class="font-medium text-slate-700"><%= current_user.username %></span></p>
-        <span class="badge-pill bg-red-100 text-red-700 text-xs">Admin</span>
-      </header>
-
-      <% if notice.present? %>
-        <div class="bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-6 py-2 text-sm">✅ <%= notice %></div>
-      <% end %>
-      <% if alert.present? %>
-        <div class="bg-red-50 border-b border-red-200 text-red-800 px-6 py-2 text-sm">⚠️ <%= alert %></div>
-      <% end %>
-
-      <main class="flex-1 p-6">
-        <%= yield %>
-      </main>
     </div>
 
-  <script>
-    // ── Shared AI streaming + markdown rendering ──────────────────────────────
-    const AI_HEADINGS = [
-      'Book Lookup', 'Policy Check', 'Book Summary', 'Condition Assessment', 'Fraud Signals', 'Recommendation',
-      'Venue Research', 'Chain or Independent\\?', 'Existing Book Programs',
-      'Address Validation', 'Suitability Assessment', 'Concerns'
-    ];
-
-    const AI_HEADING_PATTERNS = [
-      { pattern: /Book\s*Lookup/i, canonical: 'Book Lookup' },
-      { pattern: /Policy\s*Check/i, canonical: 'Policy Check' },
-      { pattern: /Book\s*Summary/i, canonical: 'Book Summary' },
-      { pattern: /Condition(?:\s*Assessment)?/i, canonical: 'Condition Assessment' },
-      { pattern: /Fraud\s*Signals/i, canonical: 'Fraud Signals' },
-      { pattern: /Recommendation/i, canonical: 'Recommendation' },
-      { pattern: /Venue\s*Research/i, canonical: 'Venue Research' },
-      { pattern: /Chain\s*or\s*Independent\??/i, canonical: 'Chain or Independent?' },
-      { pattern: /Existing\s*Book\s*Programs/i, canonical: 'Existing Book Programs' },
-      { pattern: /Address\s*Validation/i, canonical: 'Address Validation' },
-      { pattern: /Suitability\s*Assessment/i, canonical: 'Suitability Assessment' },
-      { pattern: /Concerns/i, canonical: 'Concerns' }
-    ];
-
-    function fixAiHeadings(text) {
-      let fixed = (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      fixed = fixed.replace(/([^\n])(##\s*)/g, '$1\n\n$2');
-
-      AI_HEADING_PATTERNS.forEach(({ pattern, canonical }) => {
-        fixed = fixed.replace(new RegExp(`^\\s*##\\s*${pattern.source}\\s*:?([^\\n]*)$`, 'gim'), (_match, trailing) => {
-          const tail = (trailing || '').trim();
-          return tail ? `## ${canonical}\n\n${tail}` : `## ${canonical}`;
+    <script>
+      const AI_HEADINGS = [
+        'Book Lookup', 'Policy Check', 'Book Summary', 'Condition Assessment', 'Fraud Signals', 'Recommendation',
+        'Venue Research', 'Chain or Independent?', 'Existing Book Programs',
+        'Address Validation', 'Suitability Assessment', 'Concerns'
+      ];
+      const AI_HEADING_PATTERNS = [
+        { pattern: /Book\s*Lookup/i, canonical: 'Book Lookup' },
+        { pattern: /Policy\s*Check/i, canonical: 'Policy Check' },
+        { pattern: /Book\s*Summary/i, canonical: 'Book Summary' },
+        { pattern: /Condition(?:\s*Assessment)?/i, canonical: 'Condition Assessment' },
+        { pattern: /Fraud\s*Signals/i, canonical: 'Fraud Signals' },
+        { pattern: /Recommendation/i, canonical: 'Recommendation' },
+        { pattern: /Venue\s*Research/i, canonical: 'Venue Research' },
+        { pattern: /Chain\s*or\s*Independent\??/i, canonical: 'Chain or Independent?' },
+        { pattern: /Existing\s*Book\s*Programs/i, canonical: 'Existing Book Programs' },
+        { pattern: /Address\s*Validation/i, canonical: 'Address Validation' },
+        { pattern: /Suitability\s*Assessment/i, canonical: 'Suitability Assessment' },
+        { pattern: /Concerns/i, canonical: 'Concerns' }
+      ];
+      function fixAiHeadings(text) {
+        let fixed = (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        fixed = fixed.replace(/([^\n])(##\s*)/g, '$1\n\n$2');
+        AI_HEADING_PATTERNS.forEach(({ pattern, canonical }) => {
+          fixed = fixed.replace(new RegExp(`^\\s*##\\s*${pattern.source}\\s*:?([^\\n]*)$`, 'gim'), (_match, trailing) => {
+            const tail = (trailing || '').trim();
+            return tail ? `## ${canonical}\n\n${tail}` : `## ${canonical}`;
+          });
         });
-      });
-
-      AI_HEADINGS.forEach(h => {
-        fixed = fixed
-          .replace(new RegExp(`([^\\n])(## ${h})`, 'g'), '$1\n\n$2')
-          .replace(new RegExp(`(## ${h})([^\\n])`, 'g'), '$1\n\n$2');
-      });
-
-      fixed = fixed.replace(/^\s*~\s+/gm, '- ');
-      fixed = fixed.replace(/([.!?:])\s*-\s+(?=[A-Z0-9])/g, '$1\n- ');
-      fixed = fixed.replace(/\n{3,}/g, '\n\n').trim();
-      return fixed;
-    }
-
-    const REC_KEYWORDS = ['LOOKS GOOD', 'NEEDS HUMAN ATTENTION', 'LIKELY REJECT', 'LIKELY DECLINE'];
-    const REC_CLASSES  = {
-      'LOOKS GOOD':            'bg-emerald-100 text-emerald-700',
-      'LIKELY REJECT':         'bg-red-100 text-red-700',
-      'LIKELY DECLINE':        'bg-red-100 text-red-700',
-      'NEEDS HUMAN ATTENTION': 'bg-amber-100 text-amber-700',
-    };
-
-    function renderAiMarkdown(text, _type) {
-      const md  = document.getElementById('ai-md-output');
-      const box = document.getElementById('ai-content-area');
-      const emp = document.getElementById('ai-empty-state');
-      const ind = document.getElementById('ai-streaming-indicator');
-      if (!md) return;
-      const fixedText = fixAiHeadings(text);
-      if (typeof marked === 'undefined') {
-        md.textContent = fixedText;
-      } else {
-        md.innerHTML = marked.parse(fixedText);
+        AI_HEADINGS.forEach(h => {
+          fixed = fixed
+            .replace(new RegExp(`([^\\n])(## ${h})`, 'g'), '$1\n\n$2')
+            .replace(new RegExp(`(## ${h})([^\\n])`, 'g'), '$1\n\n$2');
+        });
+        fixed = fixed.replace(/^\s*~\s+/gm, '- ');
+        fixed = fixed.replace(/([.!?:])\s*-\s+(?=[A-Z0-9])/g, '$1\n- ');
+        fixed = fixed.replace(/\n{3,}/g, '\n\n').trim();
+        return fixed;
       }
-      box.classList.remove('hidden');
-      emp.classList.add('hidden');
-      ind.classList.add('hidden');
-      updateRecPill(text);
-    }
-
-    function updateRecPill(text) {
-      const pill    = document.getElementById('ai-rec-pill');
-      const badge   = document.getElementById('ai-rec-badge');
-      if (!pill || !badge) return;
-      const keyword = REC_KEYWORDS.find(k => text.includes(k));
-      if (keyword) {
-        badge.textContent = keyword;
-        badge.className   = 'badge-pill text-sm px-3 py-1 font-semibold ' + (REC_CLASSES[keyword] || 'bg-slate-100 text-slate-600');
-        pill.classList.remove('hidden');
-      }
-    }
-
-    function startAiStream(url, type) {
-      const btn = document.getElementById('ai-run-btn');
-      const md  = document.getElementById('ai-md-output');
-      const box = document.getElementById('ai-content-area');
-      const emp = document.getElementById('ai-empty-state');
-      const ind = document.getElementById('ai-streaming-indicator');
-      const pill= document.getElementById('ai-rec-pill');
-
-      btn.disabled    = true;
-      btn.textContent = '⏳ Running…';
-      ind.classList.remove('hidden');
-      emp.classList.add('hidden');
-      box.classList.add('hidden');
-      pill.classList.add('hidden');
-      if (md) md.innerHTML = '';
-
-      let accumulated = '';
-      const es = new EventSource(url);
-
-      es.onmessage = function(e) {
-        if (e.data === '[DONE]') {
-          es.close();
-          btn.disabled    = false;
-          btn.textContent = '↻ Re-run';
-          ind.classList.add('hidden');
-          // Final render
-          renderAiMarkdown(accumulated, type);
-          // Update reviewed-at
-          const ts = document.getElementById('ai-reviewed-at');
-          if (ts) {
-            const now = new Date();
-            ts.textContent = 'Reviewed just now';
-          }
-          return;
-        }
-        if (e.data.startsWith('[ERROR]')) {
-          es.close();
-          btn.disabled    = false;
-          btn.textContent = '↻ Re-run';
-          ind.classList.add('hidden');
-          box.classList.remove('hidden');
-          if (md) md.innerHTML = '<p class="text-red-500">' + e.data + '</p>';
-          return;
-        }
-        // Unescape newlines sent from server
-        const chunk = e.data.replace(/\\n/g, '\n');
-        accumulated += chunk;
-        // Re-render markdown as we go
-        if (md) md.innerHTML = (typeof marked !== 'undefined') ? marked.parse(fixAiHeadings(accumulated)) : fixAiHeadings(accumulated);
+      const REC_KEYWORDS = ['LOOKS GOOD', 'NEEDS HUMAN ATTENTION', 'LIKELY REJECT', 'LIKELY DECLINE'];
+      const REC_CLASSES  = {
+        'LOOKS GOOD':            'bg-emerald-100 text-emerald-700',
+        'LIKELY REJECT':         'bg-red-100 text-red-700',
+        'LIKELY DECLINE':        'bg-red-100 text-red-700',
+        'NEEDS HUMAN ATTENTION': 'bg-amber-100 text-amber-700',
+      };
+      function renderAiMarkdown(text, _type) {
+        const md  = document.getElementById('ai-md-output');
+        const box = document.getElementById('ai-content-area');
+        const emp = document.getElementById('ai-empty-state');
+        const ind = document.getElementById('ai-streaming-indicator');
+        if (!md) return;
+        const fixedText = fixAiHeadings(text);
+        md.innerHTML = (typeof marked !== 'undefined') ? marked.parse(fixedText) : fixedText;
         box.classList.remove('hidden');
         emp.classList.add('hidden');
-        updateRecPill(accumulated);
-        // Scroll to bottom
-        box.scrollTop = box.scrollHeight;
-      };
-
-      es.onerror = function() {
-        es.close();
-        btn.disabled    = false;
-        btn.textContent = '↻ Re-run';
         ind.classList.add('hidden');
-      };
-    }
-  </script>
+        updateRecPill(text);
+      }
+      function updateRecPill(text) {
+        const pill  = document.getElementById('ai-rec-pill');
+        const badge = document.getElementById('ai-rec-badge');
+        if (!pill || !badge) return;
+        const keyword = REC_KEYWORDS.find(k => text.includes(k));
+        if (keyword) {
+          badge.textContent = keyword;
+          badge.className   = 'badge-pill text-sm px-3 py-1 font-semibold ' + (REC_CLASSES[keyword] || 'bg-slate-100 text-slate-600');
+          pill.classList.remove('hidden');
+        }
+      }
+      function startAiStream(url, type) {
+        const btn = document.getElementById('ai-run-btn');
+        const md  = document.getElementById('ai-md-output');
+        const box = document.getElementById('ai-content-area');
+        const emp = document.getElementById('ai-empty-state');
+        const ind = document.getElementById('ai-streaming-indicator');
+        const pill= document.getElementById('ai-rec-pill');
+        btn.disabled    = true;
+        btn.textContent = '⏳ Running…';
+        ind.classList.remove('hidden');
+        emp.classList.add('hidden');
+        box.classList.add('hidden');
+        pill.classList.add('hidden');
+        if (md) md.innerHTML = '';
+        let accumulated = '';
+        const es = new EventSource(url);
+        es.onmessage = function(e) {
+          if (e.data === '[DONE]') {
+            es.close();
+            btn.disabled    = false;
+            btn.textContent = '↻ Re-run';
+            ind.classList.add('hidden');
+            renderAiMarkdown(accumulated, type);
+            const ts = document.getElementById('ai-reviewed-at');
+            if (ts) ts.textContent = 'Reviewed just now';
+            return;
+          }
+          if (e.data.startsWith('[ERROR]')) {
+            es.close();
+            btn.disabled    = false;
+            btn.textContent = '↻ Re-run';
+            ind.classList.add('hidden');
+            box.classList.remove('hidden');
+            if (md) md.innerHTML = '<p style="color:#dc2626;">' + e.data + '</p>';
+            return;
+          }
+          const chunk = e.data.replace(/\\n/g, '\n');
+          accumulated += chunk;
+          if (md) md.innerHTML = (typeof marked !== 'undefined') ? marked.parse(fixAiHeadings(accumulated)) : fixAiHeadings(accumulated);
+          box.classList.remove('hidden');
+          emp.classList.add('hidden');
+          updateRecPill(accumulated);
+          box.scrollTop = box.scrollHeight;
+        };
+        es.onerror = function() {
+          es.close();
+          btn.disabled    = false;
+          btn.textContent = '↻ Re-run';
+          ind.classList.add('hidden');
+        };
+      }
+    </script>
   </body>
 </html>
