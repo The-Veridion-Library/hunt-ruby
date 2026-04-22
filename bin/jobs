@@ -3,4 +3,28 @@
 require_relative "../config/environment"
 require "solid_queue/cli"
 
+if Gem.win_platform?
+	module SolidQueue
+		class Supervisor
+			module Signals
+				private
+
+				# Windows Ruby doesn't support all POSIX signals (e.g. SIGQUIT).
+				# Skip unsupported ones so the supervisor can boot normally.
+				def register_signal_handlers
+					self.class::SIGNALS.each do |signal|
+						begin
+							trap(signal) do
+								send("handle_#{signal.downcase}")
+							end
+						rescue ArgumentError
+							# Ignore unsupported signals on this platform.
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 SolidQueue::Cli.start(ARGV)
