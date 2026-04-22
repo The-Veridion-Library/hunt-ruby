@@ -7,22 +7,36 @@
     <meta name="csrf-token" content="<%= form_authenticity_token %>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application', defer: true %>
     <%= vite_stylesheet_tag 'application', media: 'all' %>
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+      :root {
+        --bg: #faf7f2;
+        --surface: #fffdf9;
+        --border: #e8e0d0;
+        --text: #2d2520;
+        --text-muted: #8a7a6a;
+        --amber: #d97706;
+        --amber-light: #fbbf24;
+        --amber-pale: #fef3c7;
+        --terracotta: #c2410c;
+      }
+      * { font-family: 'Figtree', sans-serif; }
+      body { background-color: var(--bg); color: var(--text); }
+    </style>
   </head>
-  <body class="bg-slate-50 text-slate-800 min-h-screen">
+  <body class="min-h-screen">
 
     <!-- Navigation -->
-    <nav class="bg-slate-900 fixed top-0 left-0 right-0 z-50 shadow-lg">
+    <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
 
           <!-- Logo + desktop primary links -->
           <div class="flex items-center gap-8">
-            <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg tracking-tight hover:text-amber-400 transition-colors" do %>
+            <%= link_to root_path, class: "flex items-center gap-2 font-bold text-lg tracking-tight transition-colors nav-logo" do %>
               <span class="text-2xl">📖</span>
               <span>TVBH</span>
             <% end %>
@@ -39,37 +53,35 @@
           <!-- Right side -->
           <div class="flex items-center gap-3">
             <% if user_signed_in? && current_user.admin? %>
-              <%= link_to "🛡 Admin", admin_root_path, class: "nav-link bg-red-900 text-red-200 hover:bg-red-800" %>
+              <%= link_to "🛡 Admin", admin_root_path, class: "nav-link nav-link-admin" %>
             <% end %>
 
             <% if user_signed_in? %>
-              <%# Pending friend request badge %>
               <% pending_count = Friendship.where(friend: current_user, status: 'pending').count %>
 
-              <%# User dropdown %>
               <div class="relative" id="user-dropdown-wrapper">
                 <button id="user-dropdown-btn"
                         onclick="toggleUserDropdown()"
-                        class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors text-sm font-medium rounded-md px-2 py-1.5 hover:bg-slate-800"
+                        class="nav-user-btn flex items-center gap-2 text-sm font-medium rounded-lg px-2 py-1.5 transition-colors"
                         aria-haspopup="true" aria-expanded="false">
-                  <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-sm flex-shrink-0 relative">
+                  <div class="w-8 h-8 rounded-full bg-amber-400 text-stone-900 flex items-center justify-center font-bold text-sm flex-shrink-0 relative">
                     <%= (current_user.username || current_user.email).first.upcase %>
                     <% if pending_count > 0 %>
                       <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none"><%= pending_count %></span>
                     <% end %>
                   </div>
                   <span class="hidden sm:block"><%= current_user.username || current_user.email %></span>
-                  <svg class="w-3.5 h-3.5 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-3.5 h-3.5 hidden sm:block opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                   </svg>
                 </button>
 
                 <!-- Dropdown menu -->
                 <div id="user-dropdown-menu"
-                     class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50"
+                     class="hidden absolute right-0 mt-2 w-52 rounded-2xl shadow-xl border py-1.5 z-50 dropdown-menu"
                      role="menu">
-                  <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">My Account</p>
+                  <div class="px-3 py-2 border-b mb-1 dropdown-header">
+                    <p class="text-xs font-semibold uppercase tracking-wide">My Account</p>
                   </div>
                   <%= link_to profile_path(current_user.username), class: "dropdown-item", role: "menuitem" do %>
                     <span>👤</span> My Profile
@@ -86,24 +98,24 @@
                   <%= link_to friendships_path, class: "dropdown-item relative", role: "menuitem" do %>
                     <span>👥</span> Friends
                     <% if pending_count > 0 %>
-                      <span class="ml-auto bg-amber-400 text-slate-900 text-xs font-bold rounded-full px-1.5 py-0.5"><%= pending_count %></span>
+                      <span class="ml-auto bg-amber-400 text-stone-900 text-xs font-bold rounded-full px-1.5 py-0.5"><%= pending_count %></span>
                     <% end %>
                   <% end %>
-                  <div class="border-t border-slate-100 mt-1 pt-1">
+                  <div class="border-t mt-1 pt-1 dropdown-divider">
                     <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
-                        class: "dropdown-item text-red-500 hover:bg-red-50 w-full text-left",
+                        class: "dropdown-item dropdown-item-danger w-full text-left",
                         role: "menuitem" %>
                   </div>
                 </div>
               </div>
 
             <% else %>
-              <%= link_to "Sign In", new_user_session_path, class: "text-slate-300 hover:text-white text-sm font-medium transition-colors" %>
-              <%= link_to "Sign Up", new_user_registration_path, class: "bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors" %>
+              <%= link_to "Sign In", new_user_session_path, class: "nav-link" %>
+              <%= link_to "Sign Up", new_user_registration_path, class: "btn-primary text-sm px-4 py-1.5" %>
             <% end %>
 
             <!-- Mobile hamburger -->
-            <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+            <button class="md:hidden nav-hamburger p-1 rounded-md transition-colors" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
               </svg>
@@ -112,7 +124,7 @@
         </div>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-700 py-3 pb-4">
+        <div id="mobile-menu" class="hidden md:hidden border-t mobile-menu-panel py-3 pb-4">
           <div class="flex flex-col gap-1">
             <%= link_to "📚 Book Catalog", books_path, class: "mobile-nav-link" %>
             <%= link_to "🧭 Hunts", hunts_path, class: "mobile-nav-link" %>
@@ -120,16 +132,16 @@
             <%= link_to "🏆 Leaderboard", leaderboard_path, class: "mobile-nav-link" %>
             <%= link_to "📍 Locations", locations_path, class: "mobile-nav-link" %>
             <% if user_signed_in? %>
-              <div class="border-t border-slate-700 mt-2 pt-2 flex flex-col gap-1">
+              <div class="border-t mt-2 pt-2 flex flex-col gap-1 mobile-menu-divider">
                 <%= link_to "👤 My Profile", profile_path(current_user.username), class: "mobile-nav-link" %>
                 <%= link_to "📖 My Books", books_path(mine: true), class: "mobile-nav-link" %>
                 <%= link_to "🎯 My Finds", finds_path, class: "mobile-nav-link" %>
                 <%= link_to "🏷 My Labels", labels_path, class: "mobile-nav-link" %>
                 <% pending_count ||= Friendship.where(friend: current_user, status: 'pending').count %>
                 <%= link_to "👥 Friends#{pending_count > 0 ? " (#{pending_count})" : ""}", friendships_path, class: "mobile-nav-link" %>
-                <div class="border-t border-slate-700 mt-2 pt-2">
+                <div class="border-t mt-2 pt-2 mobile-menu-divider">
                   <%= button_to "Sign Out", destroy_user_session_path, method: :delete,
-                      class: "mobile-nav-link text-red-400 hover:text-red-300 w-full text-left cursor-pointer bg-transparent border-0" %>
+                      class: "mobile-nav-link mobile-nav-link-danger w-full text-left cursor-pointer bg-transparent border-0" %>
                 </div>
               </div>
             <% end %>
@@ -141,12 +153,12 @@
     <!-- Flash messages -->
     <div class="fixed top-16 left-0 right-0 z-40 flex flex-col items-center gap-2 pt-3 px-4 pointer-events-none">
       <% if notice.present? %>
-        <div class="pointer-events-auto bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-lg shadow-md text-sm font-medium max-w-lg w-full">
+        <div class="pointer-events-auto flash-success px-5 py-3 rounded-xl shadow-md text-sm font-medium max-w-lg w-full">
           ✅ <%= notice %>
         </div>
       <% end %>
       <% if alert.present? %>
-        <div class="pointer-events-auto bg-red-50 border border-red-200 text-red-800 px-5 py-3 rounded-lg shadow-md text-sm font-medium max-w-lg w-full">
+        <div class="pointer-events-auto flash-error px-5 py-3 rounded-xl shadow-md text-sm font-medium max-w-lg w-full">
           ⚠️ <%= alert %>
         </div>
       <% end %>
@@ -158,6 +170,18 @@
     </main>
 
     <script>
+      // Navbar scroll blur effect
+      const nav = document.getElementById('main-nav');
+      function updateNav() {
+        if (window.scrollY > 10) {
+          nav.classList.add('nav-scrolled');
+        } else {
+          nav.classList.remove('nav-scrolled');
+        }
+      }
+      window.addEventListener('scroll', updateNav, { passive: true });
+      updateNav();
+
       function toggleUserDropdown() {
         const menu = document.getElementById('user-dropdown-menu');
         const btn  = document.getElementById('user-dropdown-btn');
@@ -165,7 +189,6 @@
         menu.classList.toggle('hidden', open);
         btn.setAttribute('aria-expanded', String(!open));
       }
-      // Close dropdown when clicking outside
       document.addEventListener('click', function(e) {
         const wrapper = document.getElementById('user-dropdown-wrapper');
         if (wrapper && !wrapper.contains(e.target)) {
