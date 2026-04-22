@@ -75,3 +75,5 @@ group :test do
 end
 
 gem "foreman", "~> 0.90.0", group: :development
+
+gem "rails_icons", "~> 1.8"
